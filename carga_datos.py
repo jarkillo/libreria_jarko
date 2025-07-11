@@ -52,6 +52,8 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ";", encoding: str = "utf-8") 
 
     try:
         df = pd.read_csv(ruta_archivo, sep=sep, encoding=encoding)
+    except pd.errors.EmptyDataError:
+        raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")
     except UnicodeDecodeError as e:
         raise ValueError(
             f"No se pudo leer el archivo '{ruta}' con codificación '{encoding}'. "
