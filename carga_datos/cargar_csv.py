@@ -1,8 +1,16 @@
+"""
+Módulo para cargar archivos CSV.
+
+Este módulo contiene funciones específicas para la carga de archivos CSV
+con manejo robusto de errores y validación de tipos.
+"""
+
 import pandas as pd
 from pathlib import Path
 from typing import Union
 
-def cargar_csv(ruta: Union[str, Path], sep: str = ";", encoding: str = "utf-8") -> pd.DataFrame:
+
+def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") -> pd.DataFrame:
     """
     Carga un archivo CSV y lo devuelve como DataFrame.
 
@@ -11,7 +19,7 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ";", encoding: str = "utf-8") 
     ruta : Union[str, Path]
         Ruta del archivo CSV que se quiere cargar.
     sep : str, opcional
-        Separador del archivo. Por defecto es ';'.
+        Separador del archivo. Por defecto es ','.
     encoding : str, opcional
         Codificación del archivo. Por defecto es 'utf-8'.
 
@@ -23,13 +31,14 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ";", encoding: str = "utf-8") 
     Errores:
     -------
     - Lanza FileNotFoundError si el archivo no existe.
-    - Lanza ValueError si el encoding no es válido o el CSV no se puede parsear.
+    - Lanza ValueError si el encoding no es válido, el CSV no se puede parsear,
+      hay problemas de permisos, memoria insuficiente o el archivo está vacío.
     - Lanza TypeError si los parámetros no son del tipo correcto.
 
     Ejemplos:
     --------
     >>> df = cargar_csv("datos.csv")
-    >>> df = cargar_csv("datos.csv", sep=",", encoding="latin1")
+    >>> df = cargar_csv("datos.csv", sep=";", encoding="latin1")
     """
     # Validar tipos de entrada
     if not isinstance(ruta, (str, Path)):
@@ -59,10 +68,26 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ";", encoding: str = "utf-8") 
             f"No se pudo leer el archivo '{ruta}' con codificación '{encoding}'. "
             f"Error: {str(e)}"
         )
+    except LookupError as e:
+        # Encoding inexistente
+        raise ValueError(
+            f"La codificación '{encoding}' no es válida o no está disponible. "
+            f"Error: {str(e)}"
+        )
     except pd.errors.ParserError as e:
         raise ValueError(
             f"No se pudo parsear el archivo '{ruta}'. "
             f"Revisa el separador ('{sep}') o el contenido del archivo. "
+            f"Error: {str(e)}"
+        )
+    except PermissionError as e:
+        raise ValueError(
+            f"No tienes permisos para leer el archivo '{ruta}'. "
+            f"Error: {str(e)}"
+        )
+    except MemoryError as e:
+        raise ValueError(
+            f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
             f"Error: {str(e)}"
         )
     except Exception as e:
@@ -73,4 +98,4 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ";", encoding: str = "utf-8") 
     if df.empty:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")
 
-    return df
+    return df 
