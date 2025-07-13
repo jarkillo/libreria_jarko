@@ -603,7 +603,7 @@ class TestCargarParquet:
         if not self.parquet_existe:
             pytest.skip("PyArrow no disponible")
         
-        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+        with pytest.raises(ValueError, match="no existen en el archivo"):
             cargar_parquet(self.parquet_valido, columns=['nombre', 'columna_inexistente'])
 
     def test_parquet_sin_permisos(self):

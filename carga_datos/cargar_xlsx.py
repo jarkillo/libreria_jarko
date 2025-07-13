@@ -75,12 +75,27 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
             f"Instala 'openpyxl' con: pip install openpyxl. "
             f"Error: {str(e)}"
         )
+    except MemoryError as e:
+        raise ValueError(
+            f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
+            f"Error: {str(e)}"
+        )
+    except PermissionError as e:
+        raise ValueError(
+            f"No tienes permisos para leer el archivo '{ruta}'. "
+            f"Error: {str(e)}"
+        )
     except ValueError as e:
         # Capturar errores específicos de pandas Excel
         error_msg = str(e).lower()
-        if "worksheet" in error_msg and "does not exist" in error_msg:
+        if "worksheet" in error_msg and ("does not exist" in error_msg or "not found" in error_msg):
             raise ValueError(
                 f"La hoja '{sheet_name}' no existe en el archivo '{ruta}'. "
+                f"Error: {str(e)}"
+            )
+        elif "worksheet index" in error_msg and "invalid" in error_msg:
+            raise ValueError(
+                f"El índice de hoja '{sheet_name}' no existe en el archivo '{ruta}'. "
                 f"Error: {str(e)}"
             )
         elif "excel file format cannot be determined" in error_msg:
@@ -97,27 +112,30 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
             raise ValueError(
                 f"Error al procesar el archivo '{ruta}': {str(e)}"
             )
-    except PermissionError as e:
-        raise ValueError(
-            f"No tienes permisos para leer el archivo '{ruta}'. "
-            f"Error: {str(e)}"
-        )
-    except MemoryError as e:
-        raise ValueError(
-            f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
-            f"Error: {str(e)}"
-        )
     except Exception as e:
-        # Capturar otros errores específicos de openpyxl
+        # Capturar otros errores específicos por nombre de clase
+        exception_name = type(e).__name__
         error_msg = str(e).lower()
-        if "invalid file" in error_msg or "not supported" in error_msg:
+        
+        if exception_name in ['BadZipFile', 'InvalidFileException'] or "not a zip file" in error_msg or "invalid file" in error_msg:
             raise ValueError(
                 f"El archivo '{ruta}' no es un archivo Excel válido. "
                 f"Error: {str(e)}"
             )
-        elif "permission" in error_msg or "denied" in error_msg:
+        elif exception_name in ['FileNotFoundError', 'OSError', 'IOError'] or "permission" in error_msg or "denied" in error_msg:
             raise ValueError(
                 f"No tienes permisos para leer el archivo '{ruta}'. "
+                f"Error: {str(e)}"
+            )
+        elif exception_name == 'UnicodeDecodeError' or "encoding" in error_msg:
+            raise ValueError(
+                f"Error de codificación al leer el archivo '{ruta}'. "
+                f"El archivo podría estar corrupto. "
+                f"Error: {str(e)}"
+            )
+        elif "not supported" in error_msg or "unsupported" in error_msg:
+            raise ValueError(
+                f"El formato del archivo '{ruta}' no es soportado por el engine '{engine}'. "
                 f"Error: {str(e)}"
             )
         else:

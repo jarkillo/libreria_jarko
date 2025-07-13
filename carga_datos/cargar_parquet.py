@@ -65,28 +65,52 @@ def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) 
             f"Instala 'pyarrow' con: pip install pyarrow. "
             f"Error: {str(e)}"
         )
+    except MemoryError as e:
+        raise ValueError(
+            f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
+            f"Error: {str(e)}"
+        )
+    except PermissionError as e:
+        raise ValueError(
+            f"No tienes permisos para leer el archivo '{ruta}'. "
+            f"Error: {str(e)}"
+        )
     except Exception as e:
-        # Capturar errores específicos de pyarrow
+        # Capturar errores específicos de pyarrow por nombre de clase
+        exception_name = type(e).__name__
         error_msg = str(e).lower()
-        if "not a parquet file" in error_msg or "invalid parquet file" in error_msg:
+        
+        if exception_name == 'ArrowInvalid':
+            if "no match for fieldref" in error_msg or "columna_inexistente" in error_msg:
+                raise ValueError(
+                    f"Una o más columnas especificadas no existen en el archivo '{ruta}'. "
+                    f"Columnas solicitadas: {columns}. "
+                    f"Error: {str(e)}"
+                )
+            else:
+                raise ValueError(
+                    f"El archivo '{ruta}' no es un archivo Parquet válido. "
+                    f"Error: {str(e)}"
+                )
+        elif "not a parquet file" in error_msg or "invalid parquet file" in error_msg or "magic bytes not found" in error_msg:
             raise ValueError(
                 f"El archivo '{ruta}' no es un archivo Parquet válido. "
                 f"Error: {str(e)}"
             )
-        elif "column" in error_msg and "does not exist" in error_msg:
+        elif exception_name == 'ArrowIOError' or "no match for fieldref" in error_msg or ("column" in error_msg and "does not exist" in error_msg):
             raise ValueError(
                 f"Una o más columnas especificadas no existen en el archivo '{ruta}'. "
                 f"Columnas solicitadas: {columns}. "
                 f"Error: {str(e)}"
             )
-        elif "permission" in error_msg or "denied" in error_msg:
+        elif exception_name in ['OSError', 'IOError'] or "permission" in error_msg or "denied" in error_msg:
             raise ValueError(
                 f"No tienes permisos para leer el archivo '{ruta}'. "
                 f"Error: {str(e)}"
             )
-        elif "memory" in error_msg or "out of memory" in error_msg:
+        elif "file size is 0 bytes" in error_msg or "empty" in error_msg:
             raise ValueError(
-                f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
+                f"El archivo '{ruta}' está vacío o no contiene datos válidos. "
                 f"Error: {str(e)}"
             )
         else:
