@@ -46,6 +46,81 @@ df = cargar_csv("datos.csv", sep=";")          # Separador personalizado
 df = cargar_csv("datos.csv", encoding="latin1") # Encoding específico
 ```
 
+#### `cargar_parquet`
+
+**Descripción**: Carga un archivo Parquet y lo devuelve como DataFrame de pandas con validaciones robustas.
+
+**Firma**: 
+```python
+def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) -> pd.DataFrame
+```
+
+**Parámetros**:
+- `ruta`: Ruta del archivo Parquet (str o Path)
+- `columns`: Lista de columnas específicas a cargar (opcional)
+
+**Retorna**: DataFrame de pandas con el contenido del archivo Parquet
+
+**Errores**:
+- `FileNotFoundError`: Si el archivo no existe
+- `ValueError`: Si hay problemas con el archivo, columnas inexistentes, permisos o memoria insuficiente
+- `TypeError`: Si los parámetros no son del tipo correcto
+
+**Ejemplo de uso**:
+```python
+# Importar desde el paquete principal (recomendado)
+from libreria_jarko import cargar_parquet
+df = cargar_parquet("datos.parquet")
+
+# Cargar solo columnas específicas
+df = cargar_parquet("datos.parquet", columns=["nombre", "edad"])
+
+# O importar desde el módulo específico
+from libreria_jarko.carga_datos import cargar_parquet
+df = cargar_parquet("datos.parquet")
+```
+
+#### `cargar_xlsx`
+
+**Descripción**: Carga un archivo Excel (.xlsx) y lo devuelve como DataFrame de pandas con validaciones robustas.
+
+**Firma**: 
+```python
+def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0, 
+                header: Optional[int] = 0, engine: Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'] = 'openpyxl') -> pd.DataFrame
+```
+
+**Parámetros**:
+- `ruta`: Ruta del archivo Excel (str o Path)
+- `sheet_name`: Nombre o índice de la hoja (por defecto 0)
+- `header`: Número de fila para encabezado (por defecto 0, None para sin encabezado)
+- `engine`: Motor de lectura (por defecto 'openpyxl')
+
+**Retorna**: DataFrame de pandas con el contenido del archivo Excel
+
+**Errores**:
+- `FileNotFoundError`: Si el archivo no existe
+- `ValueError`: Si hay problemas con el archivo, hoja inexistente, permisos o memoria insuficiente
+- `TypeError`: Si los parámetros no son del tipo correcto
+
+**Ejemplo de uso**:
+```python
+# Importar desde el paquete principal (recomendado)
+from libreria_jarko import cargar_xlsx
+df = cargar_xlsx("datos.xlsx")
+
+# Cargar hoja específica
+df = cargar_xlsx("datos.xlsx", sheet_name="Hoja1")
+df = cargar_xlsx("datos.xlsx", sheet_name=1)
+
+# Sin encabezado
+df = cargar_xlsx("datos.xlsx", header=None)
+
+# O importar desde el módulo específico
+from libreria_jarko.carga_datos import cargar_xlsx
+df = cargar_xlsx("datos.xlsx")
+```
+
 **Casos especiales que maneja**:
 - ✅ Archivos CSV correctamente formateados
 - ✅ Archivos con BOM (Byte Order Mark) 
@@ -64,13 +139,13 @@ df = cargar_csv("datos.csv", encoding="latin1") # Encoding específico
 - ✅ Archivos vacíos o con solo encabezado
 - ✅ Validación de tipos de parámetros
 
-**Tests comprehensivos**: La función cuenta con **30 tests** que cubren todos los casos de uso y errores posibles, garantizando robustez y confiabilidad.
+**Tests comprehensivos**: Las funciones cuentan con tests que cubren todos los casos de uso y errores posibles, garantizando robustez y confiabilidad.
 
 ## Instalación
 
 Para usar esta librería necesitas:
 ```bash
-pip install pandas
+pip install pandas pyarrow openpyxl
 ```
 
 Para ejecutar los tests:
