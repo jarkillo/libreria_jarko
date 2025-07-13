@@ -72,7 +72,7 @@ class TestCargarCsv:
         # Crear archivo binario renombrado como CSV
         self.archivo_binario = os.path.join(self.temp_dir, "test_binario.csv")
         with open(self.archivo_binario, 'wb') as f:
-            f.write(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01')
+            f.write(PNG_HEADER_BYTES)
         
         # Crear archivo con separadores mixtos
         self.csv_separadores_mixtos = os.path.join(self.temp_dir, "test_separadores_mixtos.csv")
