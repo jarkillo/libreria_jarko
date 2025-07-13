@@ -337,7 +337,7 @@ class TestCargarCsv:
         
         # Quitar permisos de lectura
         try:
-            os.chmod(archivo_sin_permisos, 0o000)
+            os.chmod(archivo_sin_permisos, NO_PERMISSIONS)
             with pytest.raises((PermissionError, ValueError)):
                 cargar_csv(archivo_sin_permisos)
         finally:
