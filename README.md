@@ -1,13 +1,11 @@
 # Librería Jarko - Funciones Utilitarias
 
-[![Tests](https://github.com/USUARIO/libreria_jarko/actions/workflows/python-tests.yml/badge.svg)](https://github.com/USUARIO/libreria_jarko/actions/workflows/python-tests.yml)
-[![codecov](https://codecov.io/gh/USUARIO/libreria_jarko/branch/main/graph/badge.svg)](https://codecov.io/gh/USUARIO/libreria_jarko)
+[![Tests](https://github.com/jarkillo/libreria_jarko/actions/workflows/python-tests.yml/badge.svg)](https://github.com/USUARIO/libreria_jarko/actions/workflows/python-tests.yml)
+[![codecov](https://codecov.io/gh/USUARIO/libreria_jarko/branch/main/graph/badge.svg)](https://codecov.io/gh/jarkillo/libreria_jarko)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Esta librería contiene funciones utilitarias para facilitar tareas comunes de procesamiento de datos.
-
-> **Nota:** Reemplaza `USUARIO` en los badges por tu nombre de usuario de GitHub una vez creado el repositorio.
 
 ## Funciones Disponibles
 
