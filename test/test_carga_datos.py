@@ -648,7 +648,7 @@ class TestCargarParquet:
         with open(parquet_vacio, 'w') as f:
             f.write("")
         
-        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+        with pytest.raises(ValueError, match="no es un archivo Parquet válido"):
             cargar_parquet(parquet_vacio)
 
     def test_parquet_esquema_inconsistente(self):
@@ -784,7 +784,7 @@ class TestCargarXlsx:
         with open(archivo_falso, 'w') as f:
             f.write("esto no es xlsx")
         
-        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+        with pytest.raises(ValueError, match="no es un archivo Excel válido"):
             cargar_xlsx(archivo_falso)
 
     # TESTS ADICIONALES
@@ -824,7 +824,7 @@ class TestCargarXlsx:
         if not self.xlsx_existe:
             pytest.skip("openpyxl no disponible")
         
-        with pytest.raises(ValueError, match="Error al procesar el archivo"):
+        with pytest.raises(ValueError, match="La hoja .* no existe"):
             cargar_xlsx(self.xlsx_multiple_hojas, sheet_name='HojaInexistente')
 
     def test_xlsx_hoja_inexistente_por_indice(self):
@@ -832,7 +832,7 @@ class TestCargarXlsx:
         if not self.xlsx_existe:
             pytest.skip("openpyxl no disponible")
         
-        with pytest.raises(ValueError, match="Error al procesar el archivo"):
+        with pytest.raises(ValueError, match="El índice de hoja .* no existe"):
             cargar_xlsx(self.xlsx_valido, sheet_name=5)
 
     def test_xlsx_sin_permisos(self):
@@ -859,7 +859,7 @@ class TestCargarXlsx:
         with open(archivo_corrupto, 'wb') as f:
             f.write(b"PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00\x00\x00")  # Zip corrupto
         
-        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+        with pytest.raises(ValueError, match="no es un archivo Excel válido"):
             cargar_xlsx(archivo_corrupto)
 
     @pytest.mark.skipif(not hasattr(pd, 'read_excel'), reason="pandas no tiene soporte para Excel")
@@ -897,7 +897,7 @@ class TestCargarXlsx:
             f.write("nombre,edad,ciudad\n")
             f.write("Juan,25,Madrid\n")
         
-        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+        with pytest.raises(ValueError, match="no es un archivo Excel válido"):
             cargar_xlsx(csv_falso)
 
     def test_xlsx_ruta_es_directorio(self):
@@ -945,5 +945,5 @@ class TestCargarXlsx:
         with open(xlsx_vacio, 'w') as f:
             f.write("")
         
-        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+        with pytest.raises(ValueError, match="no es un archivo Excel válido"):
             cargar_xlsx(xlsx_vacio) 
