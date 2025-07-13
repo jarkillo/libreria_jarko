@@ -10,7 +10,7 @@ import unittest.mock as mock
 
 # Agregar el directorio padre al path para importar el módulo
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from carga_datos import cargar_csv
+from carga_datos import cargar_csv, cargar_parquet, cargar_xlsx
 
 
 class TestCargarCsv:
@@ -120,6 +120,32 @@ class TestCargarCsv:
             f.write("nombre,edad,ciudad\n")
             f.write("José,25,\"Madrid, España\"\n")
             f.write("María,30,\"Barcelona; Cataluña\"\n")
+
+        # NUEVOS TESTS ADICIONALES
+        
+        # CSV con solo una columna pero múltiples separadores
+        self.csv_una_columna_separadores = os.path.join(self.temp_dir, "test_una_columna_separadores.csv")
+        with open(self.csv_una_columna_separadores, 'w', encoding='utf-8') as f:
+            f.write("descripcion\n")
+            f.write("Producto A; precio: 100; stock: 50\n")
+            f.write("Producto B; precio: 200; stock: 30\n")
+        
+        # CSV con solo una línea en blanco
+        self.csv_linea_blanco = os.path.join(self.temp_dir, "test_linea_blanco.csv")
+        with open(self.csv_linea_blanco, 'w', encoding='utf-8') as f:
+            f.write(" \n")  # Solo una línea con espacio
+        
+        # CSV con BOM pero encoding utf-8 (no utf-8-sig)
+        self.csv_bom_utf8 = os.path.join(self.temp_dir, "test_bom_utf8.csv")
+        with open(self.csv_bom_utf8, 'wb') as f:
+            f.write('\ufeff'.encode('utf-8'))  # BOM
+            f.write("nombre,edad\nJuan,25\n".encode('utf-8'))
+        
+        # CSV con columnas duplicadas múltiples
+        self.csv_columnas_multi_duplicadas = os.path.join(self.temp_dir, "test_multi_duplicadas.csv")
+        with open(self.csv_columnas_multi_duplicadas, 'w', encoding='utf-8') as f:
+            f.write("nombre,nombre,nombre,edad\n")
+            f.write("Juan,Pedro,Carlos,25\n")
 
     def teardown_method(self):
         """Limpiar archivos de test después de cada test"""
@@ -375,8 +401,549 @@ class TestCargarCsv:
                 pass
 
     def test_archivo_muy_grande(self):
-        """Test archivo muy grande usando mock"""
-        # Simular MemoryError al leer archivo grande
-        with mock.patch('pandas.read_csv', side_effect=MemoryError("Archivo demasiado grande")):
+        """Test archivo muy grande para memoria"""
+        # Usar mock para simular MemoryError
+        with mock.patch('pandas.read_csv') as mock_read_csv:
+            mock_read_csv.side_effect = MemoryError("Insufficient memory")
+            
             with pytest.raises(ValueError, match="es demasiado grande para cargar en memoria"):
-                cargar_csv(self.csv_comas) 
+                cargar_csv(self.csv_comas)
+
+    # TESTS ADICIONALES
+
+    def test_csv_una_columna_multiples_separadores(self):
+        """Test CSV con una columna que contiene múltiples separadores internos"""
+        df = cargar_csv(self.csv_una_columna_separadores)
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 2
+        assert len(df.columns) == 1
+        assert list(df.columns) == ["descripcion"]
+        # Verificar que los separadores internos se preservan
+        assert "precio: 100" in df.iloc[0]["descripcion"]
+        assert "stock: 50" in df.iloc[0]["descripcion"]
+
+    def test_csv_linea_blanco(self):
+        """Test CSV con solo una línea en blanco"""
+        with pytest.raises(ValueError, match="El archivo .* está vacío"):
+            cargar_csv(self.csv_linea_blanco)
+
+    def test_csv_bom_encoding_utf8(self):
+        """Test CSV con BOM pero usando encoding utf-8 (no utf-8-sig)"""
+        # Debería manejar el BOM correctamente o lanzar error claro
+        try:
+            df = cargar_csv(self.csv_bom_utf8)
+            assert isinstance(df, pd.DataFrame)
+            assert len(df) == 1
+            # Verificar que el BOM no afecta el primer nombre de columna
+            columns = list(df.columns)
+            assert any("nombre" in col for col in columns)
+        except ValueError as e:
+            # Si falla, debe ser por encoding
+            assert "encoding" in str(e) or "parsear" in str(e)
+
+    def test_csv_columnas_multiples_duplicadas(self):
+        """Test CSV con múltiples columnas duplicadas"""
+        df = cargar_csv(self.csv_columnas_multi_duplicadas)
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 1
+        assert len(df.columns) == 4
+        # pandas debería renombrar las columnas duplicadas
+        columns = list(df.columns)
+        assert columns.count("nombre") == 1  # Solo una columna debería mantener el nombre original
+        assert "edad" in columns
+
+    def test_csv_estructura_final_con_separadores(self):
+        """Test para verificar estructura final con múltiples separadores"""
+        # Usar archivo con separadores internos pero que debería parsearse correctamente
+        df = cargar_csv(self.csv_caracteres_especiales)
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 2
+        assert len(df.columns) == 3
+        # Verificar que las comas y punto y comas internos se preservan
+        assert "Madrid, España" in df.iloc[0]["ciudad"]
+        assert "Barcelona; Cataluña" in df.iloc[1]["ciudad"]
+
+    def test_csv_detectar_bom_automaticamente(self):
+        """Test para verificar que se detecta BOM automáticamente"""
+        # Probar con archivo que tiene BOM usando utf-8-sig
+        df = cargar_csv(self.csv_con_bom)
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 1
+        columns = list(df.columns)
+        # Verificar que no hay caracteres extraños del BOM
+        assert "nombre" in columns
+        assert not any('\ufeff' in col for col in columns)
+
+    def test_csv_advertencia_columnas_duplicadas(self):
+        """Test que maneja columnas duplicadas sin lanzar error pero con estructura correcta"""
+        df = cargar_csv(self.csv_columnas_duplicadas)
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 1
+        assert len(df.columns) == 3
+        # pandas maneja las columnas duplicadas automáticamente
+        columns = list(df.columns)
+        assert len(set(columns)) <= 3  # No más de 3 columnas únicas
+
+
+class TestCargarParquet:
+    """Tests para la función cargar_parquet"""
+
+    def setup_method(self):
+        """Configurar archivos de test antes de cada test"""
+        self.temp_dir = tempfile.mkdtemp()
+        
+        # Crear archivo Parquet válido para tests exitosos
+        self.parquet_valido = os.path.join(self.temp_dir, "test_valido.parquet")
+        # Crear un DataFrame de ejemplo y guardarlo como Parquet
+        df_ejemplo = pd.DataFrame({
+            'nombre': ['Juan', 'Ana', 'Carlos'],
+            'edad': [25, 30, 35],
+            'ciudad': ['Madrid', 'Barcelona', 'Valencia'],
+            'activo': [True, False, True]
+        })
+        try:
+            df_ejemplo.to_parquet(self.parquet_valido)
+            self.parquet_existe = True
+        except ImportError:
+            self.parquet_existe = False
+        
+        # Crear archivo Parquet vacío (simulado)
+        self.parquet_vacio = os.path.join(self.temp_dir, "test_vacio.parquet")
+        if self.parquet_existe:
+            df_vacio = pd.DataFrame()
+            try:
+                df_vacio.to_parquet(self.parquet_vacio)
+            except Exception:
+                # Si no se puede crear Parquet vacío, crear archivo texto
+                with open(self.parquet_vacio, 'w') as f:
+                    f.write("")
+
+    def teardown_method(self):
+        """Limpiar archivos de test después de cada test"""
+        import shutil
+        shutil.rmtree(self.temp_dir)
+
+    def test_archivo_parquet_no_existe(self):
+        """Test error: archivo parquet no existe"""
+        with pytest.raises(FileNotFoundError, match="El archivo .* no existe"):
+            cargar_parquet("archivo_inexistente.parquet")
+
+    def test_tipo_ruta_parquet_invalido(self):
+        """Test error: tipo de ruta inválido para parquet"""
+        with pytest.raises(TypeError, match="El parámetro 'ruta' debe ser str o Path"):
+            cargar_parquet(123)  # type: ignore
+
+    def test_tipo_columns_invalido(self):
+        """Test error: tipo de columns inválido"""
+        ruta_parquet = os.path.join(self.temp_dir, "test.parquet")
+        with open(ruta_parquet, 'w') as f:
+            f.write("fake parquet")
+        
+        with pytest.raises(TypeError, match="El parámetro 'columns' debe ser lista o None"):
+            cargar_parquet(ruta_parquet, columns="invalid")  # type: ignore
+
+    def test_columns_elementos_no_string(self):
+        """Test error: elementos de columns no son strings"""
+        ruta_parquet = os.path.join(self.temp_dir, "test.parquet")
+        with open(ruta_parquet, 'w') as f:
+            f.write("fake parquet")
+        
+        with pytest.raises(TypeError, match="Todos los elementos de 'columns' deben ser strings"):
+            cargar_parquet(ruta_parquet, columns=[123, "nombre"])  # type: ignore
+
+    def test_archivo_no_es_parquet(self):
+        """Test error: archivo no es parquet válido"""
+        archivo_falso = os.path.join(self.temp_dir, "fake.parquet")
+        with open(archivo_falso, 'w') as f:
+            f.write("esto no es parquet")
+        
+        with pytest.raises(ValueError, match="no es un archivo Parquet válido"):
+            cargar_parquet(archivo_falso)
+
+    # TESTS ADICIONALES
+
+    @pytest.mark.skipif(not hasattr(pd, 'read_parquet'), reason="pandas no tiene soporte para Parquet")
+    def test_parquet_bien_formado_completo(self):
+        """Test cargar Parquet bien formado completo"""
+        if not self.parquet_existe:
+            pytest.skip("PyArrow no disponible")
+        
+        df = cargar_parquet(self.parquet_valido)
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 3
+        assert len(df.columns) == 4
+        expected_columns = ['nombre', 'edad', 'ciudad', 'activo']
+        assert all(col in df.columns for col in expected_columns)
+        assert df.iloc[0]['nombre'] == 'Juan'
+        assert df.iloc[1]['edad'] == 30
+
+    @pytest.mark.skipif(not hasattr(pd, 'read_parquet'), reason="pandas no tiene soporte para Parquet")
+    def test_parquet_bien_formado_columnas_especificas(self):
+        """Test cargar Parquet con columnas específicas"""
+        if not self.parquet_existe:
+            pytest.skip("PyArrow no disponible")
+        
+        df = cargar_parquet(self.parquet_valido, columns=['nombre', 'edad'])
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 3
+        assert len(df.columns) == 2
+        assert list(df.columns) == ['nombre', 'edad']
+        assert df.iloc[0]['nombre'] == 'Juan'
+        assert df.iloc[1]['edad'] == 30
+
+    def test_parquet_columnas_inexistentes(self):
+        """Test error: columnas inexistentes en parámetro columns"""
+        if not self.parquet_existe:
+            pytest.skip("PyArrow no disponible")
+        
+        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+            cargar_parquet(self.parquet_valido, columns=['nombre', 'columna_inexistente'])
+
+    def test_parquet_sin_permisos(self):
+        """Test error: archivo Parquet sin permisos"""
+        if not self.parquet_existe:
+            pytest.skip("PyArrow no disponible")
+        
+        if platform.system() == "Windows":
+            pytest.skip("Permisos en Windows se manejan diferente")
+        
+        # Quitar permisos de lectura
+        os.chmod(self.parquet_valido, 0o000)
+        
+        try:
+            with pytest.raises(ValueError, match="No tienes permisos para leer el archivo"):
+                cargar_parquet(self.parquet_valido)
+        finally:
+            # Restaurar permisos para cleanup
+            os.chmod(self.parquet_valido, 0o644)
+
+    def test_parquet_ruta_es_directorio(self):
+        """Test error: la ruta es un directorio, no un archivo"""
+        with pytest.raises(ValueError, match="La ruta .* no es un archivo válido"):
+            cargar_parquet(self.temp_dir)
+
+    def test_parquet_archivo_grande_memoria(self):
+        """Test archivo Parquet muy grande para memoria"""
+        if not self.parquet_existe:
+            pytest.skip("PyArrow no disponible")
+        
+        # Usar mock para simular MemoryError
+        with mock.patch('pandas.read_parquet') as mock_read_parquet:
+            mock_read_parquet.side_effect = MemoryError("Insufficient memory")
+            
+            with pytest.raises(ValueError, match="es demasiado grande para cargar en memoria"):
+                cargar_parquet(self.parquet_valido)
+
+    def test_parquet_vacio(self):
+        """Test error: archivo Parquet vacío"""
+        # Crear archivo vacío
+        parquet_vacio = os.path.join(self.temp_dir, "vacio.parquet")
+        with open(parquet_vacio, 'w') as f:
+            f.write("")
+        
+        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+            cargar_parquet(parquet_vacio)
+
+    def test_parquet_esquema_inconsistente(self):
+        """Test Parquet con esquema inconsistente"""
+        # Crear archivo con formato incorrecto
+        parquet_malo = os.path.join(self.temp_dir, "malo.parquet")
+        with open(parquet_malo, 'wb') as f:
+            f.write(b"PAR1\x00\x00\x00\x00")  # Header incorrecto
+        
+        with pytest.raises(ValueError, match="no es un archivo Parquet válido"):
+            cargar_parquet(parquet_malo)
+
+    def test_parquet_con_path_object(self):
+        """Test cargar Parquet usando Path object"""
+        if not self.parquet_existe:
+            pytest.skip("PyArrow no disponible")
+        
+        df = cargar_parquet(Path(self.parquet_valido))
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 3
+
+
+class TestCargarXlsx:
+    """Tests para la función cargar_xlsx"""
+
+    def setup_method(self):
+        """Configurar archivos de test antes de cada test"""
+        self.temp_dir = tempfile.mkdtemp()
+        
+        # Crear archivo Excel válido para tests exitosos
+        self.xlsx_valido = os.path.join(self.temp_dir, "test_valido.xlsx")
+        # Crear un DataFrame de ejemplo y guardarlo como Excel
+        df_ejemplo = pd.DataFrame({
+            'nombre': ['Juan', 'Ana', 'Carlos'],
+            'edad': [25, 30, 35],
+            'ciudad': ['Madrid', 'Barcelona', 'Valencia'],
+            'activo': [True, False, True]
+        })
+        try:
+            df_ejemplo.to_excel(self.xlsx_valido, sheet_name='Datos', index=False)
+            self.xlsx_existe = True
+        except ImportError:
+            self.xlsx_existe = False
+        
+        # Crear archivo Excel con múltiples hojas
+        self.xlsx_multiple_hojas = os.path.join(self.temp_dir, "test_multiple_hojas.xlsx")
+        if self.xlsx_existe:
+            try:
+                with pd.ExcelWriter(self.xlsx_multiple_hojas) as writer:
+                    df_ejemplo.to_excel(writer, sheet_name='Hoja1', index=False)
+                    df_ejemplo.to_excel(writer, sheet_name='Hoja2', index=False)
+                    # Hoja con datos diferentes
+                    df_ventas = pd.DataFrame({
+                        'producto': ['A', 'B', 'C'],
+                        'precio': [100, 200, 300]
+                    })
+                    df_ventas.to_excel(writer, sheet_name='Ventas', index=False)
+            except Exception:
+                self.xlsx_existe = False
+        
+        # Crear archivo Excel con header=None
+        self.xlsx_sin_header = os.path.join(self.temp_dir, "test_sin_header.xlsx")
+        if self.xlsx_existe:
+            try:
+                df_sin_header = pd.DataFrame([
+                    ['Juan', 25, 'Madrid'],
+                    ['Ana', 30, 'Barcelona'],
+                    ['Carlos', 35, 'Valencia']
+                ])
+                df_sin_header.to_excel(self.xlsx_sin_header, header=False, index=False)
+            except Exception:
+                pass
+        
+        # Crear archivo Excel con celdas vacías y combinadas (simulado)
+        self.xlsx_celdas_especiales = os.path.join(self.temp_dir, "test_celdas_especiales.xlsx")
+        if self.xlsx_existe:
+            try:
+                df_especial = pd.DataFrame({
+                    'nombre': ['Juan', None, 'Carlos'],
+                    'edad': [25, 30, None],
+                    'observaciones': ['Activo', '', 'Inactivo']
+                })
+                df_especial.to_excel(self.xlsx_celdas_especiales, index=False)
+            except Exception:
+                pass
+
+    def teardown_method(self):
+        """Limpiar archivos de test después de cada test"""
+        import shutil
+        shutil.rmtree(self.temp_dir)
+
+    def test_archivo_xlsx_no_existe(self):
+        """Test error: archivo xlsx no existe"""
+        with pytest.raises(FileNotFoundError, match="El archivo .* no existe"):
+            cargar_xlsx("archivo_inexistente.xlsx")
+
+    def test_tipo_ruta_xlsx_invalido(self):
+        """Test error: tipo de ruta inválido para xlsx"""
+        with pytest.raises(TypeError, match="El parámetro 'ruta' debe ser str o Path"):
+            cargar_xlsx(123)  # type: ignore
+
+    def test_tipo_sheet_name_invalido(self):
+        """Test error: tipo de sheet_name inválido"""
+        ruta_xlsx = os.path.join(self.temp_dir, "test.xlsx")
+        with open(ruta_xlsx, 'w') as f:
+            f.write("fake xlsx")
+        
+        with pytest.raises(TypeError, match="El parámetro 'sheet_name' debe ser str o int"):
+            cargar_xlsx(ruta_xlsx, sheet_name=12.5)  # type: ignore
+
+    def test_tipo_header_invalido(self):
+        """Test error: tipo de header inválido"""
+        ruta_xlsx = os.path.join(self.temp_dir, "test.xlsx")
+        with open(ruta_xlsx, 'w') as f:
+            f.write("fake xlsx")
+        
+        with pytest.raises(TypeError, match="El parámetro 'header' debe ser int o None"):
+            cargar_xlsx(ruta_xlsx, header="invalid")  # type: ignore
+
+    def test_engine_invalido(self):
+        """Test error: engine inválido"""
+        ruta_xlsx = os.path.join(self.temp_dir, "test.xlsx")
+        with open(ruta_xlsx, 'w') as f:
+            f.write("fake xlsx")
+        
+        with pytest.raises(TypeError, match="El parámetro 'engine' debe ser uno de"):
+            cargar_xlsx(ruta_xlsx, engine="invalid_engine")  # type: ignore
+
+    def test_archivo_no_es_xlsx(self):
+        """Test error: archivo no es xlsx válido"""
+        archivo_falso = os.path.join(self.temp_dir, "fake.xlsx")
+        with open(archivo_falso, 'w') as f:
+            f.write("esto no es xlsx")
+        
+        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+            cargar_xlsx(archivo_falso)
+
+    # TESTS ADICIONALES
+
+    @pytest.mark.skipif(not hasattr(pd, 'read_excel'), reason="pandas no tiene soporte para Excel")
+    def test_xlsx_bien_formado_por_indice(self):
+        """Test cargar Excel bien formado por índice de hoja"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        df = cargar_xlsx(self.xlsx_valido, sheet_name=0)
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 3
+        assert len(df.columns) == 4
+        expected_columns = ['nombre', 'edad', 'ciudad', 'activo']
+        assert all(col in df.columns for col in expected_columns)
+        assert df.iloc[0]['nombre'] == 'Juan'
+
+    @pytest.mark.skipif(not hasattr(pd, 'read_excel'), reason="pandas no tiene soporte para Excel")
+    def test_xlsx_bien_formado_por_nombre(self):
+        """Test cargar Excel bien formado por nombre de hoja"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        df = cargar_xlsx(self.xlsx_multiple_hojas, sheet_name='Ventas')
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 3
+        assert len(df.columns) == 2
+        assert list(df.columns) == ['producto', 'precio']
+        assert df.iloc[0]['producto'] == 'A'
+        assert df.iloc[0]['precio'] == 100
+
+    def test_xlsx_hoja_inexistente_por_nombre(self):
+        """Test error: hoja inexistente por nombre"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        with pytest.raises(ValueError, match="Error al procesar el archivo"):
+            cargar_xlsx(self.xlsx_multiple_hojas, sheet_name='HojaInexistente')
+
+    def test_xlsx_hoja_inexistente_por_indice(self):
+        """Test error: hoja inexistente por índice"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        with pytest.raises(ValueError, match="Error al procesar el archivo"):
+            cargar_xlsx(self.xlsx_valido, sheet_name=5)
+
+    def test_xlsx_sin_permisos(self):
+        """Test error: archivo Excel sin permisos"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        if platform.system() == "Windows":
+            pytest.skip("Permisos en Windows se manejan diferente")
+        
+        # Quitar permisos de lectura
+        os.chmod(self.xlsx_valido, 0o000)
+        
+        try:
+            with pytest.raises(ValueError, match="No tienes permisos para leer el archivo"):
+                cargar_xlsx(self.xlsx_valido)
+        finally:
+            # Restaurar permisos para cleanup
+            os.chmod(self.xlsx_valido, 0o644)
+
+    def test_xlsx_formato_corrupto(self):
+        """Test error: archivo con formato corrupto"""
+        archivo_corrupto = os.path.join(self.temp_dir, "corrupto.xlsx")
+        with open(archivo_corrupto, 'wb') as f:
+            f.write(b"PK\x03\x04\x14\x00\x00\x00\x08\x00\x00\x00\x00\x00")  # Zip corrupto
+        
+        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+            cargar_xlsx(archivo_corrupto)
+
+    @pytest.mark.skipif(not hasattr(pd, 'read_excel'), reason="pandas no tiene soporte para Excel")
+    def test_xlsx_header_none(self):
+        """Test cargar Excel con header=None"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        df = cargar_xlsx(self.xlsx_sin_header, header=None)
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 3
+        # Las columnas deberían ser numéricas (0, 1, 2, etc.)
+        assert all(isinstance(col, int) for col in df.columns)
+        assert df.iloc[0, 0] == 'Juan'  # Primera fila, primera columna
+
+    @pytest.mark.skipif(not hasattr(pd, 'read_excel'), reason="pandas no tiene soporte para Excel")
+    def test_xlsx_celdas_vacias(self):
+        """Test archivo con celdas vacías y valores NaN"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        df = cargar_xlsx(self.xlsx_celdas_especiales)
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 3
+        # Verificar que maneja valores NaN correctamente
+        assert pd.isna(df.iloc[1, 0])  # Segunda fila, primera columna (nombre)
+        assert pd.isna(df.iloc[2, 1])  # Tercera fila, segunda columna (edad)
+
+    def test_xlsx_csv_renombrado(self):
+        """Test error: archivo CSV renombrado como Excel"""
+        csv_falso = os.path.join(self.temp_dir, "falso.xlsx")
+        with open(csv_falso, 'w', encoding='utf-8') as f:
+            f.write("nombre,edad,ciudad\n")
+            f.write("Juan,25,Madrid\n")
+        
+        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+            cargar_xlsx(csv_falso)
+
+    def test_xlsx_ruta_es_directorio(self):
+        """Test error: la ruta es un directorio, no un archivo"""
+        with pytest.raises(ValueError, match="La ruta .* no es un archivo válido"):
+            cargar_xlsx(self.temp_dir)
+
+    def test_xlsx_archivo_grande_memoria(self):
+        """Test archivo Excel muy grande para memoria"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        # Usar mock para simular MemoryError
+        with mock.patch('pandas.read_excel') as mock_read_excel:
+            mock_read_excel.side_effect = MemoryError("Insufficient memory")
+            
+            with pytest.raises(ValueError, match="es demasiado grande para cargar en memoria"):
+                cargar_xlsx(self.xlsx_valido)
+
+    @pytest.mark.skipif(not hasattr(pd, 'read_excel'), reason="pandas no tiene soporte para Excel")
+    def test_xlsx_con_path_object(self):
+        """Test cargar Excel usando Path object"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        df = cargar_xlsx(Path(self.xlsx_valido))
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 3
+
+    @pytest.mark.skipif(not hasattr(pd, 'read_excel'), reason="pandas no tiene soporte para Excel")
+    def test_xlsx_engine_especifico(self):
+        """Test cargar Excel con engine específico"""
+        if not self.xlsx_existe:
+            pytest.skip("openpyxl no disponible")
+        
+        df = cargar_xlsx(self.xlsx_valido, engine='openpyxl')
+        
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 3
+
+    def test_xlsx_vacio(self):
+        """Test error: archivo Excel vacío"""
+        xlsx_vacio = os.path.join(self.temp_dir, "vacio.xlsx")
+        with open(xlsx_vacio, 'w') as f:
+            f.write("")
+        
+        with pytest.raises(ValueError, match="Error inesperado al cargar el archivo"):
+            cargar_xlsx(xlsx_vacio) 
