@@ -5,13 +5,34 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Esta librería contiene funciones utilitarias para facilitar tareas comunes de procesamiento de datos.
+Esta librería contiene funciones utilitarias para facilitar tareas comunes de procesamiento de datos, organizadas en módulos especializados.
 
 > **Nota:** Reemplaza `USUARIO` en los badges por tu nombre de usuario de GitHub una vez creado el repositorio.
 
+## Estructura del Proyecto
+
+```
+libreria_jarko/
+├── carga_datos/
+│   ├── __init__.py
+│   ├── cargar_csv.py       ← Funciones para cargar archivos CSV
+│   ├── cargar_excel.py     ← Funciones para cargar archivos Excel (futuro)
+│   ├── cargar_parquet.py   ← Funciones para cargar archivos Parquet (futuro)
+│   └── cargar_archivo.py   ← Orquestador general de carga (futuro)
+├── test/
+│   ├── __init__.py
+│   └── test_carga_datos.py ← Tests comprehensivos para carga de datos
+├── __init__.py
+├── README.md
+├── requirements.txt
+└── LICENSE
+```
+
 ## Funciones Disponibles
 
-### `cargar_csv`
+### Módulo `carga_datos`
+
+#### `cargar_csv`
 
 **Descripción**: Carga un archivo CSV y lo devuelve como DataFrame de pandas con validaciones robustas.
 
@@ -34,16 +55,12 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
 
 **Ejemplo de uso**:
 ```python
-# Importar desde el paquete (recomendado)
-import libreria_jarko as lj
-df = lj.cargar_csv("datos.csv")
-
-# O importar directamente la función
+# Importar desde el paquete principal (recomendado)
 from libreria_jarko import cargar_csv
 df = cargar_csv("datos.csv")
 
-# También funciona importar desde el módulo específico
-from carga_datos import cargar_csv
+# O importar desde el módulo específico
+from libreria_jarko.carga_datos import cargar_csv
 df = cargar_csv("datos.csv")
 
 # Ejemplos de uso con diferentes parámetros
@@ -52,16 +69,24 @@ df = cargar_csv("datos.csv", encoding="latin1") # Encoding específico
 ```
 
 **Casos especiales que maneja**:
-- Archivos con BOM (Byte Order Mark)
-- Archivos con columnas duplicadas (pandas las renombra automáticamente)
-- Archivos con separadores incorrectos (detecta y maneja apropiadamente)
-- Archivos con comas internas en los valores
-- Archivos binarios renombrados como CSV (detecta y lanza error)
-- Archivos JSON/Excel renombrados como CSV (detecta y lanza error)
-- Archivos con problemas de permisos
-- Archivos demasiado grandes para memoria
-- Archivos con encoding inexistente o inválido
-- Archivos con encabezados malformados
+- ✅ Archivos CSV correctamente formateados
+- ✅ Archivos con BOM (Byte Order Mark) 
+- ✅ Archivos con columnas duplicadas (pandas las renombra automáticamente)
+- ✅ Separadores incorrectos (detecta y maneja apropiadamente)
+- ✅ Archivos con comas internas en los valores
+- ✅ Archivos con caracteres especiales y acentos
+- ✅ Archivos con filas inconsistentes (columnas faltantes o extras)
+- ✅ Archivos con encabezados malformados
+- ✅ Archivos con separadores mixtos por línea
+- ✅ Archivos binarios renombrados como CSV (detecta y lanza error)
+- ✅ Archivos JSON/Excel renombrados como CSV (detecta y lanza error)
+- ✅ Archivos con problemas de permisos
+- ✅ Archivos demasiado grandes para memoria
+- ✅ Archivos con encoding inexistente o inválido
+- ✅ Archivos vacíos o con solo encabezado
+- ✅ Validación de tipos de parámetros
+
+**Tests comprehensivos**: La función cuenta con **30 tests** que cubren todos los casos de uso y errores posibles, garantizando robustez y confiabilidad.
 
 ## Instalación
 

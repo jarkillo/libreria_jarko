@@ -1,6 +1,14 @@
+"""
+Módulo para cargar archivos CSV.
+
+Este módulo contiene funciones específicas para la carga de archivos CSV
+con manejo robusto de errores y validación de tipos.
+"""
+
 import pandas as pd
 from pathlib import Path
 from typing import Union
+
 
 def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") -> pd.DataFrame:
     """
@@ -90,4 +98,4 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
     if df.empty:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")
 
-    return df
+    return df 
