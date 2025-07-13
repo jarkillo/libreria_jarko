@@ -1,32 +1,10 @@
 # Librería Jarko - Funciones Utilitarias
 
-[![Tests](https://github.com/USUARIO/libreria_jarko/actions/workflows/python-tests.yml/badge.svg)](https://github.com/USUARIO/libreria_jarko/actions/workflows/python-tests.yml)
-[![codecov](https://codecov.io/gh/USUARIO/libreria_jarko/branch/main/graph/badge.svg)](https://codecov.io/gh/USUARIO/libreria_jarko)
+[![Tests](https://github.com/jarkillo/libreria_jarko/actions/workflows/python-tests.yml/badge.svg)](https://github.com/USUARIO/libreria_jarko/actions/workflows/python-tests.yml)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Esta librería contiene funciones utilitarias para facilitar tareas comunes de procesamiento de datos, organizadas en módulos especializados.
-
-> **Nota:** Reemplaza `USUARIO` en los badges por tu nombre de usuario de GitHub una vez creado el repositorio.
-
-## Estructura del Proyecto
-
-```
-libreria_jarko/
-├── carga_datos/
-│   ├── __init__.py
-│   ├── cargar_csv.py       ← Funciones para cargar archivos CSV
-│   ├── cargar_excel.py     ← Funciones para cargar archivos Excel (futuro)
-│   ├── cargar_parquet.py   ← Funciones para cargar archivos Parquet (futuro)
-│   └── cargar_archivo.py   ← Orquestador general de carga (futuro)
-├── test/
-│   ├── __init__.py
-│   └── test_carga_datos.py ← Tests comprehensivos para carga de datos
-├── __init__.py
-├── README.md
-├── requirements.txt
-└── LICENSE
-```
 
 ## Funciones Disponibles
 
