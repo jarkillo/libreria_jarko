@@ -1250,25 +1250,35 @@ class TestCargarArchivo:
             assert resultado.equals(mock_df)
 
     def test_cargar_archivo_nombre_con_espacios_al_final(self):
-        """Test: cargar_archivo debe manejar archivos con espacios al final del nombre"""
-        # Crear archivo con espacios al final
-        archivo_espacios = os.path.join(self.temp_dir, "archivo.csv ")
-        with open(archivo_espacios, 'w', encoding='utf-8') as f:
+        """Test: cargar_archivo debe manejar rutas con espacios eliminándolos internamente"""
+        # Crear archivo normal sin espacios en el nombre
+        archivo_sin_espacios = os.path.join(self.temp_dir, "archivo_test.csv")
+        with open(archivo_sin_espacios, 'w', encoding='utf-8') as f:
             f.write("nombre,edad\nJuan,25\n")
         
-        import importlib
-        cargar_archivo_mod = importlib.import_module('carga_datos.cargar_archivo')
+        from carga_datos import cargar_archivo
         
-        with mock.patch.object(cargar_archivo_mod, 'cargar_csv') as mock_cargar_csv:
-            mock_df = pd.DataFrame({"nombre": ["Juan"], "edad": [25]})
-            mock_cargar_csv.return_value = mock_df
-            
-            from carga_datos import cargar_archivo
-            resultado = cargar_archivo(archivo_espacios)
-            
-            mock_cargar_csv.assert_called_once_with(archivo_espacios)
-            assert isinstance(resultado, pd.DataFrame)
-            assert resultado.equals(mock_df)
+        # Crear rutas con espacios al final, inicio y ambos lados
+        ruta_con_espacios_final = archivo_sin_espacios + "   "
+        ruta_con_espacios_inicio = "   " + archivo_sin_espacios
+        ruta_con_espacios_ambos = "   " + archivo_sin_espacios + "   "
+        
+        # Todas estas rutas deberían funcionar porque strip() elimina los espacios
+        resultado_normal = cargar_archivo(archivo_sin_espacios)
+        resultado_final = cargar_archivo(ruta_con_espacios_final)
+        resultado_inicio = cargar_archivo(ruta_con_espacios_inicio)
+        resultado_ambos = cargar_archivo(ruta_con_espacios_ambos)
+        
+        # Verificar que todos los resultados sean iguales
+        assert resultado_normal.equals(resultado_final)
+        assert resultado_normal.equals(resultado_inicio)
+        assert resultado_normal.equals(resultado_ambos)
+        
+        # Verificar que todos son DataFrames válidos
+        assert isinstance(resultado_normal, pd.DataFrame)
+        assert isinstance(resultado_final, pd.DataFrame)
+        assert isinstance(resultado_inicio, pd.DataFrame)
+        assert isinstance(resultado_ambos, pd.DataFrame)
             
     def test_cargar_archivo_rutas_con_espacios_completo(self):
         """Test: cargar_archivo debe manejar rutas con espacios en diferentes posiciones"""
