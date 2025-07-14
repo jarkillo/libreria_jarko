@@ -8,6 +8,9 @@ con manejo robusto de errores y validación de tipos.
 import pandas as pd
 from pathlib import Path
 from typing import Union, Optional, Literal
+import logging
+
+from .utils import procesar_ruta
 
 
 def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0, 
@@ -59,7 +62,7 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
         raise TypeError("El parámetro 'engine' debe ser uno de: 'xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'")
 
     # Crear Path object y validar archivo
-    ruta_archivo = Path(str(ruta).strip())
+    ruta_archivo = procesar_ruta(ruta)
     
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
@@ -124,11 +127,12 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
                 f"Error al procesar el archivo '{ruta}': {str(e)}"
             )
     except Exception as e:
-        # Capturar errores específicos de Excel por nombre de clase
+        # Manejar excepciones específicas conocidas de Excel/pandas
+        # Convertir a errores informativos, re-lanzar las inesperadas
         exception_name = type(e).__name__
         error_msg = str(e).lower()
         
-        # Excepciones específicas de Excel/Zip
+        # Excepciones específicas de Excel/pandas que podemos manejar
         if exception_name in ['BadZipFile', 'InvalidFileException'] or "not a zip file" in error_msg or "invalid file" in error_msg:
             raise ValueError(
                 f"El archivo '{ruta}' no es un archivo Excel válido. "
@@ -150,7 +154,8 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
                 f"Error: {str(e)}"
             )
         else:
-            # Re-lanzar excepciones no esperadas para no ocultarlas
+            # Excepción inesperada - registrar y re-lanzar para investigación
+            logging.warning(f"Excepción inesperada en cargar_xlsx: {exception_name}: {str(e)}")
             raise
 
     if df.empty:

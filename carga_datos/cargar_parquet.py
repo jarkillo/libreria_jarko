@@ -8,6 +8,9 @@ con manejo robusto de errores y validación de tipos.
 import pandas as pd
 from pathlib import Path
 from typing import Union, Optional, List
+import logging
+
+from .utils import procesar_ruta
 
 
 def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) -> pd.DataFrame:
@@ -49,7 +52,7 @@ def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) 
         raise TypeError("Todos los elementos de 'columns' deben ser strings")
 
     # Crear Path object y validar archivo
-    ruta_archivo = Path(str(ruta).strip())
+    ruta_archivo = procesar_ruta(ruta)
     
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
@@ -76,11 +79,12 @@ def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) 
             f"Error: {str(e)}"
         )
     except Exception as e:
-        # Capturar errores específicos de pyarrow por nombre de clase
+        # Manejar excepciones específicas conocidas de pyarrow/Parquet
+        # Convertir a errores informativos, re-lanzar las inesperadas
         exception_name = type(e).__name__
         error_msg = str(e).lower()
         
-        # Excepciones específicas de pyarrow
+        # Excepciones específicas de pyarrow que podemos manejar
         if exception_name == 'ArrowInvalid':
             if "no match for fieldref" in error_msg:
                 raise ValueError(
@@ -116,7 +120,8 @@ def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) 
                 f"Error: {str(e)}"
             )
         else:
-            # Re-lanzar excepciones no esperadas para no ocultarlas
+            # Excepción inesperada - registrar y re-lanzar para investigación
+            logging.warning(f"Excepción inesperada en cargar_parquet: {exception_name}: {str(e)}")
             raise
 
     if df.empty:

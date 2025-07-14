@@ -12,6 +12,7 @@ from typing import Union
 from .cargar_csv import cargar_csv
 from .cargar_xlsx import cargar_xlsx
 from .cargar_parquet import cargar_parquet
+from .utils import procesar_ruta
 
 
 def cargar_archivo(ruta: Union[str, Path]) -> pd.DataFrame:
@@ -65,23 +66,22 @@ def cargar_archivo(ruta: Union[str, Path]) -> pd.DataFrame:
         raise TypeError("El parámetro 'ruta' debe ser str o Path")
     
     # Crear Path object
-    ruta_archivo = Path(str(ruta).strip())
+    ruta_archivo = procesar_ruta(ruta)
     
     # Verificar que el archivo existe
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
     
     # Obtener extensión en minúsculas para comparación case-insensitive
-    # Usar strip() para manejar espacios al final del nombre
-    extension = ruta_archivo.suffix.lower().strip()
+    extension = ruta_archivo.suffix.lower()
     
     # Mapear extensiones a funciones
     if extension == '.csv':
-        return cargar_csv(ruta)
+        return cargar_csv(ruta_archivo)
     elif extension == '.xlsx':
-        return cargar_xlsx(ruta)
+        return cargar_xlsx(ruta_archivo)
     elif extension == '.parquet':
-        return cargar_parquet(ruta)
+        return cargar_parquet(ruta_archivo)
     else:
         # Construir mensaje de error informativo
         formatos_soportados = ['.csv', '.xlsx', '.parquet']

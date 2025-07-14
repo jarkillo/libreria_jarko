@@ -8,6 +8,9 @@ con manejo robusto de errores y validación de tipos.
 import pandas as pd
 from pathlib import Path
 from typing import Union
+import logging
+
+from .utils import procesar_ruta
 
 
 def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") -> pd.DataFrame:
@@ -51,7 +54,7 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
         raise TypeError("El parámetro 'encoding' debe ser str")
 
     # Crear Path object y validar archivo
-    ruta_archivo = Path(str(ruta).strip())
+    ruta_archivo = procesar_ruta(ruta)
     
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
@@ -92,11 +95,12 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
             f"Error: {str(e)}"
         )
     except Exception as e:
-        # Capturar errores específicos de pandas por nombre de clase
+        # Manejar excepciones específicas conocidas de pandas/CSV
+        # Convertir a errores informativos, re-lanzar las inesperadas
         exception_name = type(e).__name__
         error_msg = str(e).lower()
         
-        # Excepciones específicas de pandas
+        # Excepciones específicas de pandas que podemos manejar
         if exception_name == 'ParserError' or "parse" in error_msg or "separator" in error_msg:
             raise ValueError(
                 f"Error al parsear el archivo '{ruta}'. "
@@ -111,7 +115,8 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
         elif "not found" in error_msg or "does not exist" in error_msg:
             raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
         else:
-            # Re-lanzar excepciones no esperadas para no ocultarlas
+            # Excepción inesperada - registrar y re-lanzar para investigación
+            logging.warning(f"Excepción inesperada en cargar_csv: {exception_name}: {str(e)}")
             raise
 
     if df.empty:
