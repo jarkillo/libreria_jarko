@@ -8,7 +8,6 @@ con manejo robusto de errores y validación de tipos.
 import pandas as pd
 from pathlib import Path
 from typing import Union, Optional, Literal
-import logging
 import zipfile
 
 from .utils import procesar_ruta, manejar_excepcion_inesperada
