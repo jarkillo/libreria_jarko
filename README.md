@@ -38,7 +38,7 @@ from libreria_jarko import cargar_csv
 df = cargar_csv("datos.csv")
 
 # O importar desde el módulo específico
-from libreria_jarko.carga_datos import cargar_csv
+from libreria_jarko.carga_datos.cargar_csv import cargar_csv
 df = cargar_csv("datos.csv")
 
 # Ejemplos de uso con diferentes parámetros
@@ -76,7 +76,7 @@ df = cargar_parquet("datos.parquet")
 df = cargar_parquet("datos.parquet", columns=["nombre", "edad"])
 
 # O importar desde el módulo específico
-from libreria_jarko.carga_datos import cargar_parquet
+from libreria_jarko.carga_datos.cargar_parquet import cargar_parquet
 df = cargar_parquet("datos.parquet")
 ```
 
@@ -117,8 +117,57 @@ df = cargar_xlsx("datos.xlsx", sheet_name=1)
 df = cargar_xlsx("datos.xlsx", header=None)
 
 # O importar desde el módulo específico
-from libreria_jarko.carga_datos import cargar_xlsx
+from libreria_jarko.carga_datos.cargar_xlsx import cargar_xlsx
 df = cargar_xlsx("datos.xlsx")
+```
+
+#### `cargar_archivo`
+
+**Descripción**: Carga un archivo detectando automáticamente el formato por extensión y llamando a la función correspondiente.
+
+**Firma**: 
+```python
+def cargar_archivo(ruta: Union[str, Path]) -> pd.DataFrame
+```
+
+**Parámetros**:
+- `ruta`: Ruta del archivo a cargar (str o Path)
+
+**Retorna**: DataFrame de pandas con el contenido del archivo
+
+**Formatos soportados**:
+- ✅ `.csv`, `.CSV` → llama a `cargar_csv()`
+- ✅ `.xlsx`, `.XLSX` → llama a `cargar_xlsx()`
+- ✅ `.parquet`, `.PARQUET` → llama a `cargar_parquet()`
+
+**Formatos NO soportados**:
+- ❌ `.xls` (Excel antiguo)
+- ❌ `.ods` (LibreOffice/OpenOffice)
+- ❌ `.json`, `.xml`, `.tsv`, `.txt`
+- ❌ Cualquier otra extensión
+
+**Errores**:
+- `FileNotFoundError`: Si el archivo no existe
+- `ValueError`: Si la extensión no es soportada o hay problemas en la función específica
+- `TypeError`: Si el parámetro no es del tipo correcto
+
+**Ejemplo de uso**:
+```python
+# Importar desde el paquete principal (recomendado)
+from libreria_jarko import cargar_archivo
+
+# Detección automática por extensión
+df = cargar_archivo("datos.csv")        # Llama a cargar_csv()
+df = cargar_archivo("datos.xlsx")       # Llama a cargar_xlsx()
+df = cargar_archivo("datos.parquet")    # Llama a cargar_parquet()
+
+# Funciona con Path objects
+from pathlib import Path
+df = cargar_archivo(Path("datos.csv"))
+
+# O importar desde el módulo específico
+from libreria_jarko.carga_datos.cargar_archivo import cargar_archivo
+df = cargar_archivo("datos.csv")
 ```
 
 **Casos especiales que maneja**:
@@ -140,6 +189,67 @@ df = cargar_xlsx("datos.xlsx")
 - ✅ Validación de tipos de parámetros
 
 **Tests comprehensivos**: Las funciones cuentan con tests que cubren todos los casos de uso y errores posibles, garantizando robustez y confiabilidad.
+
+### Módulo `utils`
+
+#### `procesar_ruta`
+
+**Descripción**: Procesa una ruta eliminando espacios en blanco y convirtiéndola a Path object.
+
+**Firma**: 
+```python
+def procesar_ruta(ruta: Union[str, Path]) -> Path
+```
+
+**Parámetros**:
+- `ruta`: Ruta del archivo que se quiere procesar (str o Path)
+
+**Retorna**: Path object con espacios eliminados
+
+**Errores**:
+- `TypeError`: Si el parámetro no es str o Path
+
+**Ejemplo de uso**:
+```python
+from libreria_jarko.carga_datos.utils import procesar_ruta
+
+# Limpia espacios al inicio y final
+ruta_limpia = procesar_ruta("  archivo.csv  ")  # PosixPath('archivo.csv')
+
+# Funciona con Path objects
+from pathlib import Path
+ruta_limpia = procesar_ruta(Path("archivo.csv "))  # PosixPath('archivo.csv')
+```
+
+#### `manejar_excepcion_inesperada`
+
+**Descripción**: Maneja excepciones inesperadas de forma consistente, registrando en el log y re-lanzando la excepción.
+
+**Firma**: 
+```python
+def manejar_excepcion_inesperada(excepcion: Exception, nombre_funcion: str) -> None
+```
+
+**Parámetros**:
+- `excepcion`: La excepción que se produjo
+- `nombre_funcion`: Nombre de la función donde ocurrió la excepción
+
+**Retorna**: None (re-lanza la excepción original)
+
+**Errores**:
+- Re-lanza la excepción original después del logging
+
+**Ejemplo de uso**:
+```python
+from libreria_jarko.carga_datos.utils import manejar_excepcion_inesperada
+
+try:
+    # algún código que puede fallar
+    resultado = operacion_riesgosa()
+except Exception as e:
+    # Registra la excepción y la re-lanza
+    manejar_excepcion_inesperada(e, 'mi_funcion')
+```
 
 ## Instalación
 

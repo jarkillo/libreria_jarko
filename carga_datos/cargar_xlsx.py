@@ -8,6 +8,9 @@ con manejo robusto de errores y validación de tipos.
 import pandas as pd
 from pathlib import Path
 from typing import Union, Optional, Literal
+import zipfile
+
+from .utils import procesar_ruta, manejar_excepcion_inesperada
 
 
 def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0, 
@@ -59,7 +62,7 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
         raise TypeError("El parámetro 'engine' debe ser uno de: 'xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'")
 
     # Crear Path object y validar archivo
-    ruta_archivo = Path(ruta)
+    ruta_archivo = procesar_ruta(ruta)
     
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
@@ -75,12 +78,43 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
             f"Instala 'openpyxl' con: pip install openpyxl. "
             f"Error: {str(e)}"
         )
+    except MemoryError as e:
+        raise ValueError(
+            f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
+            f"Error: {str(e)}"
+        )
+    except zipfile.BadZipFile as e:
+        raise ValueError(
+            f"El archivo '{ruta}' no es un archivo Excel válido. "
+            f"Error: {str(e)}"
+        )
+    except PermissionError as e:
+        raise ValueError(
+            f"No tienes permisos para leer el archivo '{ruta}'. "
+            f"Error: {str(e)}"
+        )
+    except (OSError, IOError) as e:
+        raise ValueError(
+            f"No tienes permisos para leer el archivo '{ruta}'. "
+            f"Error: {str(e)}"
+        )
+    except (UnicodeDecodeError, UnicodeError) as e:
+        raise ValueError(
+            f"Error de codificación al leer el archivo '{ruta}'. "
+            f"El archivo podría estar corrupto. "
+            f"Error: {str(e)}"
+        )
     except ValueError as e:
         # Capturar errores específicos de pandas Excel
         error_msg = str(e).lower()
-        if "worksheet" in error_msg and "does not exist" in error_msg:
+        if "worksheet" in error_msg and ("does not exist" in error_msg or "not found" in error_msg):
             raise ValueError(
                 f"La hoja '{sheet_name}' no existe en el archivo '{ruta}'. "
+                f"Error: {str(e)}"
+            )
+        elif "worksheet index" in error_msg and "invalid" in error_msg:
+            raise ValueError(
+                f"El índice de hoja '{sheet_name}' no existe en el archivo '{ruta}'. "
                 f"Error: {str(e)}"
             )
         elif "excel file format cannot be determined" in error_msg:
@@ -97,33 +131,36 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
             raise ValueError(
                 f"Error al procesar el archivo '{ruta}': {str(e)}"
             )
-    except PermissionError as e:
-        raise ValueError(
-            f"No tienes permisos para leer el archivo '{ruta}'. "
-            f"Error: {str(e)}"
-        )
-    except MemoryError as e:
-        raise ValueError(
-            f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
-            f"Error: {str(e)}"
-        )
     except Exception as e:
-        # Capturar otros errores específicos de openpyxl
+        # Manejar excepciones específicas conocidas de Excel/pandas
+        # Convertir a errores informativos, re-lanzar las inesperadas
+        exception_name = type(e).__name__
         error_msg = str(e).lower()
-        if "invalid file" in error_msg or "not supported" in error_msg:
+        
+        # Excepciones específicas de Excel/pandas que podemos manejar
+        if exception_name == 'InvalidFileException' or "not a zip file" in error_msg or "invalid file" in error_msg:
             raise ValueError(
                 f"El archivo '{ruta}' no es un archivo Excel válido. "
                 f"Error: {str(e)}"
             )
-        elif "permission" in error_msg or "denied" in error_msg:
+        elif exception_name == 'XLRDError' or "xlrd" in error_msg:
             raise ValueError(
-                f"No tienes permisos para leer el archivo '{ruta}'. "
+                f"Error al leer el archivo Excel '{ruta}' con xlrd. "
+                f"Error: {str(e)}"
+            )
+        elif "not supported" in error_msg or "unsupported" in error_msg:
+            raise ValueError(
+                f"El formato del archivo '{ruta}' no es soportado por el engine '{engine}'. "
+                f"Error: {str(e)}"
+            )
+        elif "sheet" in error_msg and ("not found" in error_msg or "does not exist" in error_msg):
+            raise ValueError(
+                f"La hoja especificada '{sheet_name}' no existe en el archivo '{ruta}'. "
                 f"Error: {str(e)}"
             )
         else:
-            raise ValueError(
-                f"Error inesperado al cargar el archivo '{ruta}': {str(e)}"
-            )
+            # Excepción inesperada - usar función utilitaria centralizada
+            manejar_excepcion_inesperada(e, 'cargar_xlsx')
 
     if df.empty:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")

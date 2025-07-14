@@ -8,6 +8,7 @@ con manejo robusto de errores y validación de tipos.
 import pandas as pd
 from pathlib import Path
 from typing import Union
+from .utils import procesar_ruta, manejar_excepcion_inesperada
 
 
 def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") -> pd.DataFrame:
@@ -51,7 +52,7 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
         raise TypeError("El parámetro 'encoding' debe ser str")
 
     # Crear Path object y validar archivo
-    ruta_archivo = Path(ruta)
+    ruta_archivo = procesar_ruta(ruta)
     
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
@@ -63,9 +64,10 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
         df = pd.read_csv(ruta_archivo, sep=sep, encoding=encoding)
     except pd.errors.EmptyDataError:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")
-    except UnicodeDecodeError as e:
+    except (UnicodeDecodeError, UnicodeError) as e:
         raise ValueError(
-            f"No se pudo leer el archivo '{ruta}' con codificación '{encoding}'. "
+            f"Error de codificación al leer el archivo '{ruta}'. "
+            f"Intenta con un encoding diferente. "
             f"Error: {str(e)}"
         )
     except LookupError as e:
@@ -80,7 +82,7 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
             f"Revisa el separador ('{sep}') o el contenido del archivo. "
             f"Error: {str(e)}"
         )
-    except PermissionError as e:
+    except (PermissionError, OSError, IOError) as e:
         raise ValueError(
             f"No tienes permisos para leer el archivo '{ruta}'. "
             f"Error: {str(e)}"
@@ -91,9 +93,28 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
             f"Error: {str(e)}"
         )
     except Exception as e:
-        raise ValueError(
-            f"Error inesperado al cargar el archivo '{ruta}': {str(e)}"
-        )
+        # Manejar excepciones específicas conocidas de pandas/CSV
+        # Convertir a errores informativos, re-lanzar las inesperadas
+        exception_name = type(e).__name__
+        error_msg = str(e).lower()
+        
+        # Excepciones específicas de pandas que podemos manejar
+        if exception_name == 'ParserError' or "parse" in error_msg or "separator" in error_msg:
+            raise ValueError(
+                f"Error al parsear el archivo '{ruta}'. "
+                f"Verifica el separador o formato del archivo. "
+                f"Error: {str(e)}"
+            )
+        elif exception_name == 'EmptyDataError' or "empty" in error_msg:
+            raise ValueError(
+                f"El archivo '{ruta}' está vacío o no contiene datos válidos. "
+                f"Error: {str(e)}"
+            )
+        elif "not found" in error_msg or "does not exist" in error_msg:
+            raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
+        else:
+            # Excepción inesperada - usar función utilitaria centralizada
+            manejar_excepcion_inesperada(e, 'cargar_csv')
 
     if df.empty:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")
