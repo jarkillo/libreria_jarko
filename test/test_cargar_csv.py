@@ -524,7 +524,7 @@ class TestCargarCsv:
         from unittest.mock import patch
         
         # Crear mock del logger para capturar logs
-        with patch('carga_datos.cargar_csv.logging.warning') as mock_warning:
+        with patch('carga_datos.cargar_csv.logging') as mock_logging:
             # Simular una excepción inesperada usando un mock que falle
             with patch('pandas.read_csv') as mock_read_csv:
                 # Crear una excepción no manejada específicamente
@@ -535,8 +535,8 @@ class TestCargarCsv:
                     cargar_csv(self.csv_valido)
                 
                 # Verificar que se registró en el log
-                mock_warning.assert_called_once()
-                llamada_args = mock_warning.call_args[0][0]
+                mock_logging.warning.assert_called_once()
+                llamada_args = mock_logging.warning.call_args[0][0]
                 assert "Excepción inesperada en cargar_csv" in llamada_args
                 assert "RuntimeError" in llamada_args
                 assert "Error inesperado simulado" in llamada_args 
