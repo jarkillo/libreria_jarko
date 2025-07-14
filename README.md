@@ -121,6 +121,55 @@ from libreria_jarko.carga_datos import cargar_xlsx
 df = cargar_xlsx("datos.xlsx")
 ```
 
+#### `cargar_archivo`
+
+**Descripción**: Carga un archivo detectando automáticamente el formato por extensión y llamando a la función correspondiente.
+
+**Firma**: 
+```python
+def cargar_archivo(ruta: Union[str, Path]) -> pd.DataFrame
+```
+
+**Parámetros**:
+- `ruta`: Ruta del archivo a cargar (str o Path)
+
+**Retorna**: DataFrame de pandas con el contenido del archivo
+
+**Formatos soportados**:
+- ✅ `.csv`, `.CSV` → llama a `cargar_csv()`
+- ✅ `.xlsx`, `.XLSX` → llama a `cargar_xlsx()`
+- ✅ `.parquet`, `.PARQUET` → llama a `cargar_parquet()`
+
+**Formatos NO soportados**:
+- ❌ `.xls` (Excel antiguo)
+- ❌ `.ods` (LibreOffice/OpenOffice)
+- ❌ `.json`, `.xml`, `.tsv`, `.txt`
+- ❌ Cualquier otra extensión
+
+**Errores**:
+- `FileNotFoundError`: Si el archivo no existe
+- `ValueError`: Si la extensión no es soportada o hay problemas en la función específica
+- `TypeError`: Si el parámetro no es del tipo correcto
+
+**Ejemplo de uso**:
+```python
+# Importar desde el paquete principal (recomendado)
+from libreria_jarko import cargar_archivo
+
+# Detección automática por extensión
+df = cargar_archivo("datos.csv")        # Llama a cargar_csv()
+df = cargar_archivo("datos.xlsx")       # Llama a cargar_xlsx()
+df = cargar_archivo("datos.parquet")    # Llama a cargar_parquet()
+
+# Funciona con Path objects
+from pathlib import Path
+df = cargar_archivo(Path("datos.csv"))
+
+# O importar desde el módulo específico
+from libreria_jarko.carga_datos import cargar_archivo
+df = cargar_archivo("datos.csv")
+```
+
 **Casos especiales que maneja**:
 - ✅ Archivos CSV correctamente formateados
 - ✅ Archivos con BOM (Byte Order Mark) 
