@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Union
 import logging
 
-from .utils import procesar_ruta
+from .utils import procesar_ruta, manejar_excepcion_inesperada
 
 
 def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") -> pd.DataFrame:
@@ -115,9 +115,8 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
         elif "not found" in error_msg or "does not exist" in error_msg:
             raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
         else:
-            # Excepción inesperada - registrar y re-lanzar para investigación
-            logging.warning(f"Excepción inesperada en cargar_csv: {exception_name}: {str(e)}")
-            raise
+            # Excepción inesperada - usar función utilitaria centralizada
+            manejar_excepcion_inesperada(e, 'cargar_csv')
 
     if df.empty:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")

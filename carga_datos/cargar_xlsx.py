@@ -9,8 +9,9 @@ import pandas as pd
 from pathlib import Path
 from typing import Union, Optional, Literal
 import logging
+import zipfile
 
-from .utils import procesar_ruta
+from .utils import procesar_ruta, manejar_excepcion_inesperada
 
 
 def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0, 
@@ -83,6 +84,11 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
             f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
             f"Error: {str(e)}"
         )
+    except zipfile.BadZipFile as e:
+        raise ValueError(
+            f"El archivo '{ruta}' no es un archivo Excel válido. "
+            f"Error: {str(e)}"
+        )
     except PermissionError as e:
         raise ValueError(
             f"No tienes permisos para leer el archivo '{ruta}'. "
@@ -133,7 +139,7 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
         error_msg = str(e).lower()
         
         # Excepciones específicas de Excel/pandas que podemos manejar
-        if exception_name in ['BadZipFile', 'InvalidFileException'] or "not a zip file" in error_msg or "invalid file" in error_msg:
+        if exception_name == 'InvalidFileException' or "not a zip file" in error_msg or "invalid file" in error_msg:
             raise ValueError(
                 f"El archivo '{ruta}' no es un archivo Excel válido. "
                 f"Error: {str(e)}"
@@ -154,9 +160,8 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
                 f"Error: {str(e)}"
             )
         else:
-            # Excepción inesperada - registrar y re-lanzar para investigación
-            logging.warning(f"Excepción inesperada en cargar_xlsx: {exception_name}: {str(e)}")
-            raise
+            # Excepción inesperada - usar función utilitaria centralizada
+            manejar_excepcion_inesperada(e, 'cargar_xlsx')
 
     if df.empty:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")

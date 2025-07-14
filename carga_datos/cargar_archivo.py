@@ -72,6 +72,9 @@ def cargar_archivo(ruta: Union[str, Path]) -> pd.DataFrame:
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
     
+    if not ruta_archivo.is_file():
+        raise ValueError(f"La ruta '{ruta}' no es un archivo válido.")
+    
     # Obtener extensión en minúsculas para comparación case-insensitive
     extension = ruta_archivo.suffix.lower()
     

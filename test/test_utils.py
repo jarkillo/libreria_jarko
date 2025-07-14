@@ -204,3 +204,41 @@ class TestProcesarRuta:
         
         assert isinstance(resultado, Path)
         assert str(resultado) == self.archivo_test 
+
+
+class TestManejarExcepcionInesperada:
+    """Tests para la función manejar_excepcion_inesperada"""
+
+    def test_manejar_excepcion_inesperada_re_lanza(self):
+        """Test: verificar que manejar_excepcion_inesperada re-lanza la excepción original"""
+        from carga_datos.utils import manejar_excepcion_inesperada
+        from unittest.mock import patch
+        
+        excepcion_original = ValueError("Error de prueba")
+        
+        with patch('logging.warning') as mock_warning:
+            with pytest.raises(ValueError, match="Error de prueba"):
+                manejar_excepcion_inesperada(excepcion_original, 'test_funcion')
+            
+            # Verificar que se registró en el log
+            mock_warning.assert_called_once()
+            llamada_args = mock_warning.call_args[0][0]
+            assert "Excepción inesperada en test_funcion" in llamada_args
+            assert "ValueError" in llamada_args
+            assert "Error de prueba" in llamada_args
+
+    def test_manejar_excepcion_inesperada_formato_log(self):
+        """Test: verificar el formato correcto del mensaje de log"""
+        from carga_datos.utils import manejar_excepcion_inesperada
+        from unittest.mock import patch
+        
+        excepcion_test = RuntimeError("Excepción de ejemplo")
+        
+        with patch('logging.warning') as mock_warning:
+            with pytest.raises(RuntimeError):
+                manejar_excepcion_inesperada(excepcion_test, 'cargar_ejemplo')
+            
+            # Verificar formato específico del log
+            mock_warning.assert_called_once_with(
+                "Excepción inesperada en cargar_ejemplo: RuntimeError: Excepción de ejemplo"
+            )

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Union, Optional, List
 import logging
 
-from .utils import procesar_ruta
+from .utils import procesar_ruta, manejar_excepcion_inesperada
 
 
 def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) -> pd.DataFrame:
@@ -120,9 +120,8 @@ def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) 
                 f"Error: {str(e)}"
             )
         else:
-            # Excepción inesperada - registrar y re-lanzar para investigación
-            logging.warning(f"Excepción inesperada en cargar_parquet: {exception_name}: {str(e)}")
-            raise
+            # Excepción inesperada - usar función utilitaria centralizada
+            manejar_excepcion_inesperada(e, 'cargar_parquet')
 
     if df.empty:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")
