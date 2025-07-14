@@ -51,7 +51,7 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
         raise TypeError("El parámetro 'encoding' debe ser str")
 
     # Crear Path object y validar archivo
-    ruta_archivo = Path(ruta)
+    ruta_archivo = Path(str(ruta).strip())
     
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
@@ -63,9 +63,10 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
         df = pd.read_csv(ruta_archivo, sep=sep, encoding=encoding)
     except pd.errors.EmptyDataError:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")
-    except UnicodeDecodeError as e:
+    except (UnicodeDecodeError, UnicodeError) as e:
         raise ValueError(
-            f"No se pudo leer el archivo '{ruta}' con codificación '{encoding}'. "
+            f"Error de codificación al leer el archivo '{ruta}'. "
+            f"Intenta con un encoding diferente. "
             f"Error: {str(e)}"
         )
     except LookupError as e:
@@ -80,7 +81,7 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
             f"Revisa el separador ('{sep}') o el contenido del archivo. "
             f"Error: {str(e)}"
         )
-    except PermissionError as e:
+    except (PermissionError, OSError, IOError) as e:
         raise ValueError(
             f"No tienes permisos para leer el archivo '{ruta}'. "
             f"Error: {str(e)}"
@@ -88,12 +89,6 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
     except MemoryError as e:
         raise ValueError(
             f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
-            f"Error: {str(e)}"
-        )
-    except (UnicodeDecodeError, UnicodeError) as e:
-        raise ValueError(
-            f"Error de codificación al leer el archivo '{ruta}'. "
-            f"Intenta con un encoding diferente. "
             f"Error: {str(e)}"
         )
     except Exception as e:

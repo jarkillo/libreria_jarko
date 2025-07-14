@@ -59,7 +59,7 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
         raise TypeError("El parámetro 'engine' debe ser uno de: 'xlrd', 'openpyxl', 'odf', 'pyxlsb', 'calamine'")
 
     # Crear Path object y validar archivo
-    ruta_archivo = Path(ruta)
+    ruta_archivo = Path(str(ruta).strip())
     
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")

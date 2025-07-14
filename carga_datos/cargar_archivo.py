@@ -65,7 +65,7 @@ def cargar_archivo(ruta: Union[str, Path]) -> pd.DataFrame:
         raise TypeError("El parámetro 'ruta' debe ser str o Path")
     
     # Crear Path object
-    ruta_archivo = Path(ruta)
+    ruta_archivo = Path(str(ruta).strip())
     
     # Verificar que el archivo existe
     if not ruta_archivo.exists():

@@ -49,7 +49,7 @@ def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) 
         raise TypeError("Todos los elementos de 'columns' deben ser strings")
 
     # Crear Path object y validar archivo
-    ruta_archivo = Path(ruta)
+    ruta_archivo = Path(str(ruta).strip())
     
     if not ruta_archivo.exists():
         raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
@@ -70,12 +70,7 @@ def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) 
             f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
             f"Error: {str(e)}"
         )
-    except PermissionError as e:
-        raise ValueError(
-            f"No tienes permisos para leer el archivo '{ruta}'. "
-            f"Error: {str(e)}"
-        )
-    except (OSError, IOError) as e:
+    except (PermissionError, OSError, IOError) as e:
         raise ValueError(
             f"No tienes permisos para leer el archivo '{ruta}'. "
             f"Error: {str(e)}"

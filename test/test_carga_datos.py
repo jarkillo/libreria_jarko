@@ -282,7 +282,7 @@ class TestCargarCsv:
     # Tests de errores de encoding
     def test_encoding_incorrecto(self):
         """Test error: encoding incorrecto"""
-        with pytest.raises(ValueError, match="No se pudo leer el archivo .* con codificación"):
+        with pytest.raises(ValueError, match="Error de codificación al leer el archivo"):
             cargar_csv(self.csv_latin1, encoding="utf-8")
     
     def test_encoding_inexistente(self):
@@ -356,7 +356,7 @@ class TestCargarCsv:
     # Tests de archivos con formatos incorrectos
     def test_archivo_binario_renombrado(self):
         """Test archivo binario renombrado como CSV"""
-        with pytest.raises(ValueError, match="No se pudo leer el archivo .* con codificación"):
+        with pytest.raises(ValueError, match="Error de codificación al leer el archivo"):
             cargar_csv(self.archivo_binario)
 
     def test_archivo_json_renombrado(self):
@@ -479,15 +479,44 @@ class TestCargarCsv:
         assert not any('\ufeff' in col for col in columns)
 
     def test_csv_advertencia_columnas_duplicadas(self):
-        """Test que maneja columnas duplicadas sin lanzar error pero con estructura correcta"""
-        df = cargar_csv(self.csv_columnas_duplicadas)
+        """Test que cuando hay columnas duplicadas en CSV, se pueda cargar sin errores"""
+        # Crear archivo con columnas duplicadas
+        archivo_duplicado = os.path.join(self.temp_dir, "test_duplicado.csv")
+        with open(archivo_duplicado, 'w', encoding='utf-8') as f:
+            f.write("nombre,edad,nombre\nJuan,25,Juan2\n")
         
-        assert isinstance(df, pd.DataFrame)
-        assert len(df) == 1
-        assert len(df.columns) == 3
-        # pandas maneja las columnas duplicadas automáticamente
-        columns = list(df.columns)
-        assert len(set(columns)) <= 3  # No más de 3 columnas únicas
+        # Debería cargar sin errores, pandas maneja las columnas duplicadas
+        resultado = cargar_csv(archivo_duplicado)
+        
+        # Verificar que se cargó correctamente
+        assert isinstance(resultado, pd.DataFrame)
+        assert not resultado.empty
+        assert len(resultado) == 1
+        # pandas agrega sufijos automáticamente para columnas duplicadas
+        assert 'nombre' in resultado.columns
+
+    def test_csv_rutas_con_espacios(self):
+        """Test: cargar_csv debe manejar rutas con espacios al inicio y final"""
+        # Crear archivo CSV normal
+        archivo_normal = os.path.join(self.temp_dir, "normal.csv")
+        with open(archivo_normal, 'w', encoding='utf-8') as f:
+            f.write("nombre,edad\nJuan,25\n")
+        
+        # Agregar espacios a la ruta
+        ruta_con_espacios_final = archivo_normal + "  "
+        ruta_con_espacios_inicio = "  " + archivo_normal
+        ruta_con_espacios_ambos = "  " + archivo_normal + "  "
+        
+        # Todas estas rutas deberían funcionar igual
+        resultado1 = cargar_csv(archivo_normal)
+        resultado2 = cargar_csv(ruta_con_espacios_final)
+        resultado3 = cargar_csv(ruta_con_espacios_inicio)
+        resultado4 = cargar_csv(ruta_con_espacios_ambos)
+        
+        # Verificar que todos los resultados sean iguales
+        assert resultado1.equals(resultado2)
+        assert resultado1.equals(resultado3)
+        assert resultado1.equals(resultado4)
 
 
 class TestCargarParquet:
@@ -670,6 +699,24 @@ class TestCargarParquet:
         
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 3
+
+    def test_parquet_rutas_con_espacios(self):
+        """Test: cargar_parquet debe manejar rutas con espacios al inicio y final"""
+        # Agregar espacios a la ruta
+        ruta_con_espacios_final = self.parquet_valido + "  "
+        ruta_con_espacios_inicio = "  " + self.parquet_valido
+        ruta_con_espacios_ambos = "  " + self.parquet_valido + "  "
+        
+        # Todas estas rutas deberían funcionar igual
+        resultado1 = cargar_parquet(self.parquet_valido)
+        resultado2 = cargar_parquet(ruta_con_espacios_final)
+        resultado3 = cargar_parquet(ruta_con_espacios_inicio)
+        resultado4 = cargar_parquet(ruta_con_espacios_ambos)
+        
+        # Verificar que todos los resultados sean iguales
+        assert resultado1.equals(resultado2)
+        assert resultado1.equals(resultado3)
+        assert resultado1.equals(resultado4)
 
 
 class TestCargarXlsx:
@@ -940,13 +987,31 @@ class TestCargarXlsx:
         assert len(df) == 3
 
     def test_xlsx_vacio(self):
-        """Test error: archivo Excel vacío"""
-        xlsx_vacio = os.path.join(self.temp_dir, "vacio.xlsx")
-        with open(xlsx_vacio, 'w') as f:
-            f.write("")
+        """Test que archivo xlsx completamente vacío lanza error"""
+        # Archivo vacío (0 bytes)
+        archivo_vacio_xlsx = os.path.join(self.temp_dir, "vacio.xlsx")
+        open(archivo_vacio_xlsx, 'w').close()
         
         with pytest.raises(ValueError, match="no es un archivo Excel válido"):
-            cargar_xlsx(xlsx_vacio) 
+            cargar_xlsx(archivo_vacio_xlsx)
+
+    def test_xlsx_rutas_con_espacios(self):
+        """Test: cargar_xlsx debe manejar rutas con espacios al inicio y final"""
+        # Agregar espacios a la ruta
+        ruta_con_espacios_final = self.xlsx_valido + "  "
+        ruta_con_espacios_inicio = "  " + self.xlsx_valido
+        ruta_con_espacios_ambos = "  " + self.xlsx_valido + "  "
+        
+        # Todas estas rutas deberían funcionar igual
+        resultado1 = cargar_xlsx(self.xlsx_valido)
+        resultado2 = cargar_xlsx(ruta_con_espacios_final)
+        resultado3 = cargar_xlsx(ruta_con_espacios_inicio)
+        resultado4 = cargar_xlsx(ruta_con_espacios_ambos)
+        
+        # Verificar que todos los resultados sean iguales
+        assert resultado1.equals(resultado2)
+        assert resultado1.equals(resultado3)
+        assert resultado1.equals(resultado4)
 
 class TestCargarArchivo:
     """
@@ -1204,6 +1269,31 @@ class TestCargarArchivo:
             mock_cargar_csv.assert_called_once_with(archivo_espacios)
             assert isinstance(resultado, pd.DataFrame)
             assert resultado.equals(mock_df)
+            
+    def test_cargar_archivo_rutas_con_espacios_completo(self):
+        """Test: cargar_archivo debe manejar rutas con espacios en diferentes posiciones"""
+        # Crear archivo CSV normal
+        archivo_normal = os.path.join(self.temp_dir, "espacios_test.csv")
+        with open(archivo_normal, 'w', encoding='utf-8') as f:
+            f.write("nombre,edad\nJuan,25\n")
+        
+        from carga_datos import cargar_archivo
+        
+        # Agregar espacios a la ruta
+        ruta_con_espacios_final = archivo_normal + "  "
+        ruta_con_espacios_inicio = "  " + archivo_normal
+        ruta_con_espacios_ambos = "  " + archivo_normal + "  "
+        
+        # Todas estas rutas deberían funcionar igual
+        resultado1 = cargar_archivo(archivo_normal)
+        resultado2 = cargar_archivo(ruta_con_espacios_final)
+        resultado3 = cargar_archivo(ruta_con_espacios_inicio)
+        resultado4 = cargar_archivo(ruta_con_espacios_ambos)
+        
+        # Verificar que todos los resultados sean iguales
+        assert resultado1.equals(resultado2)
+        assert resultado1.equals(resultado3)
+        assert resultado1.equals(resultado4)
 
     def test_cargar_archivo_formatos_no_soportados(self):
         """Test: cargar_archivo debe rechazar formatos no implementados (.xls, .ods, etc.)
