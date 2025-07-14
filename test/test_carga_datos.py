@@ -1021,12 +1021,12 @@ class TestCargarArchivo:
         """Test: archivo .csv bien formado debe llamar a cargar_csv"""
         with mock.patch('carga_datos.cargar_archivo.cargar_csv') as mock_cargar_csv:
             mock_df = pd.DataFrame({"nombre": ["Juan"], "edad": [25]})
-            mock_cargar_csv.return_value = mock_df
+            mock_cargar_csv.cargar_csv.return_value = mock_df
             
             from carga_datos import cargar_archivo
             resultado = cargar_archivo(self.archivo_csv)
             
-            mock_cargar_csv.assert_called_once_with(self.archivo_csv)
+            mock_cargar_csv.cargar_csv.assert_called_once_with(self.archivo_csv)
             assert isinstance(resultado, pd.DataFrame)
             assert resultado.equals(mock_df)
 
@@ -1034,12 +1034,12 @@ class TestCargarArchivo:
         """Test: archivo .xlsx bien formado debe llamar a cargar_xlsx"""
         with mock.patch('carga_datos.cargar_archivo.cargar_xlsx') as mock_cargar_xlsx:
             mock_df = pd.DataFrame({"nombre": ["Ana"], "edad": [30]})
-            mock_cargar_xlsx.return_value = mock_df
+            mock_cargar_xlsx.cargar_xlsx.return_value = mock_df
             
             from carga_datos import cargar_archivo
             resultado = cargar_archivo(self.archivo_xlsx)
             
-            mock_cargar_xlsx.assert_called_once_with(self.archivo_xlsx)
+            mock_cargar_xlsx.cargar_xlsx.assert_called_once_with(self.archivo_xlsx)
             assert isinstance(resultado, pd.DataFrame)
             assert resultado.equals(mock_df)
 
@@ -1047,12 +1047,12 @@ class TestCargarArchivo:
         """Test: archivo .parquet bien formado debe llamar a cargar_parquet"""
         with mock.patch('carga_datos.cargar_archivo.cargar_parquet') as mock_cargar_parquet:
             mock_df = pd.DataFrame({"nombre": ["Carlos"], "edad": [35]})
-            mock_cargar_parquet.return_value = mock_df
+            mock_cargar_parquet.cargar_parquet.return_value = mock_df
             
             from carga_datos import cargar_archivo
             resultado = cargar_archivo(self.archivo_parquet)
             
-            mock_cargar_parquet.assert_called_once_with(self.archivo_parquet)
+            mock_cargar_parquet.cargar_parquet.assert_called_once_with(self.archivo_parquet)
             assert isinstance(resultado, pd.DataFrame)
             assert resultado.equals(mock_df)
 
@@ -1074,12 +1074,12 @@ class TestCargarArchivo:
         """Test: archivo .CSV (mayúsculas) debe tratarse como .csv"""
         with mock.patch('carga_datos.cargar_archivo.cargar_csv') as mock_cargar_csv:
             mock_df = pd.DataFrame({"nombre": ["Maria"], "edad": [28]})
-            mock_cargar_csv.return_value = mock_df
+            mock_cargar_csv.cargar_csv.return_value = mock_df
             
             from carga_datos import cargar_archivo
             resultado = cargar_archivo(self.archivo_csv_mayusculas)
             
-            mock_cargar_csv.assert_called_once_with(self.archivo_csv_mayusculas)
+            mock_cargar_csv.cargar_csv.assert_called_once_with(self.archivo_csv_mayusculas)
             assert isinstance(resultado, pd.DataFrame)
             assert resultado.equals(mock_df)
 
@@ -1087,12 +1087,12 @@ class TestCargarArchivo:
         """Test: archivo .xlsx con nombre extraño debe funcionar igual"""
         with mock.patch('carga_datos.cargar_archivo.cargar_xlsx') as mock_cargar_xlsx:
             mock_df = pd.DataFrame({"columna": ["valor"]})
-            mock_cargar_xlsx.return_value = mock_df
+            mock_cargar_xlsx.cargar_xlsx.return_value = mock_df
             
             from carga_datos import cargar_archivo
             resultado = cargar_archivo(self.archivo_xlsx_nombre_extraño)
             
-            mock_cargar_xlsx.assert_called_once_with(self.archivo_xlsx_nombre_extraño)
+            mock_cargar_xlsx.cargar_xlsx.assert_called_once_with(self.archivo_xlsx_nombre_extraño)
             assert isinstance(resultado, pd.DataFrame)
             assert resultado.equals(mock_df)
 
@@ -1107,12 +1107,12 @@ class TestCargarArchivo:
         """Test: cargar_archivo debe funcionar con Path object"""
         with mock.patch('carga_datos.cargar_archivo.cargar_csv') as mock_cargar_csv:
             mock_df = pd.DataFrame({"test": ["data"]})
-            mock_cargar_csv.return_value = mock_df
+            mock_cargar_csv.cargar_csv.return_value = mock_df
             
             from carga_datos import cargar_archivo
             resultado = cargar_archivo(Path(self.archivo_csv))
             
-            mock_cargar_csv.assert_called_once_with(Path(self.archivo_csv))
+            mock_cargar_csv.cargar_csv.assert_called_once_with(Path(self.archivo_csv))
             assert isinstance(resultado, pd.DataFrame)
 
     def test_cargar_archivo_tipos_invalidos(self):
@@ -1135,29 +1135,28 @@ class TestCargarArchivo:
         with pytest.raises(FileNotFoundError, match="El archivo .* no existe"):
             cargar_archivo("archivo_inexistente.csv")
 
-    @mock.patch('carga_datos.cargar_csv')
-    def test_cargar_archivo_propaga_errores_funciones_internas(self, mock_cargar_csv):
+    def test_cargar_archivo_propaga_errores_funciones_internas(self):
         """Test: cargar_archivo debe propagar errores de las funciones internas"""
         with mock.patch('carga_datos.cargar_archivo.cargar_csv') as mock_cargar_csv:
-            mock_cargar_csv.side_effect = ValueError("Error específico de cargar_csv")
+            mock_cargar_csv.cargar_csv.side_effect = ValueError("Error específico de cargar_csv")
             
             from carga_datos import cargar_archivo
             
             with pytest.raises(ValueError, match="Error específico de cargar_csv"):
                 cargar_archivo(self.archivo_csv)
             
-            mock_cargar_csv.assert_called_once_with(self.archivo_csv)
+            mock_cargar_csv.cargar_csv.assert_called_once_with(self.archivo_csv)
 
     def test_cargar_archivo_ruta_como_string(self):
         """Test: cargar_archivo debe funcionar con ruta como string (no Path)"""
         with mock.patch('carga_datos.cargar_archivo.cargar_csv') as mock_cargar_csv:
             mock_df = pd.DataFrame({"nombre": ["Test"], "edad": [25]})
-            mock_cargar_csv.return_value = mock_df
+            mock_cargar_csv.cargar_csv.return_value = mock_df
             
             from carga_datos import cargar_archivo
             resultado = cargar_archivo(self.archivo_csv)  # Pasando como string
             
-            mock_cargar_csv.assert_called_once_with(self.archivo_csv)
+            mock_cargar_csv.cargar_csv.assert_called_once_with(self.archivo_csv)
             assert isinstance(resultado, pd.DataFrame)
             assert resultado.equals(mock_df)
 
@@ -1170,12 +1169,12 @@ class TestCargarArchivo:
         
         with mock.patch('carga_datos.cargar_archivo.cargar_csv') as mock_cargar_csv:
             mock_df = pd.DataFrame({"nombre": ["Juan"], "edad": [25]})
-            mock_cargar_csv.return_value = mock_df
+            mock_cargar_csv.cargar_csv.return_value = mock_df
             
             from carga_datos import cargar_archivo
             resultado = cargar_archivo(archivo_espacios)
             
-            mock_cargar_csv.assert_called_once_with(archivo_espacios)
+            mock_cargar_csv.cargar_csv.assert_called_once_with(archivo_espacios)
             assert isinstance(resultado, pd.DataFrame)
             assert resultado.equals(mock_df)
 
@@ -1238,16 +1237,16 @@ class TestCargarArchivo:
         from carga_datos import cargar_archivo
         
         with mock.patch('carga_datos.cargar_archivo.cargar_csv') as mock_csv:
-            mock_csv.return_value = pd.DataFrame({"test": ["data"]})
+            mock_csv.cargar_csv.return_value = pd.DataFrame({"test": ["data"]})
             cargar_archivo(archivo_Csv)
-            mock_csv.assert_called_once()
+            mock_csv.cargar_csv.assert_called_once()
         
         with mock.patch('carga_datos.cargar_archivo.cargar_xlsx') as mock_xlsx:
-            mock_xlsx.return_value = pd.DataFrame({"test": ["data"]})
+            mock_xlsx.cargar_xlsx.return_value = pd.DataFrame({"test": ["data"]})
             cargar_archivo(archivo_XlsX)
-            mock_xlsx.assert_called_once()
+            mock_xlsx.cargar_xlsx.assert_called_once()
         
         with mock.patch('carga_datos.cargar_archivo.cargar_parquet') as mock_parquet:
-            mock_parquet.return_value = pd.DataFrame({"test": ["data"]})
+            mock_parquet.cargar_parquet.return_value = pd.DataFrame({"test": ["data"]})
             cargar_archivo(archivo_PARQUET)
-            mock_parquet.assert_called_once() 
+            mock_parquet.cargar_parquet.assert_called_once() 

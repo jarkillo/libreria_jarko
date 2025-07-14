@@ -9,9 +9,9 @@ import pandas as pd
 from pathlib import Path
 from typing import Union
 
-from .cargar_csv import cargar_csv
-from .cargar_xlsx import cargar_xlsx
-from .cargar_parquet import cargar_parquet
+from . import cargar_csv
+from . import cargar_xlsx
+from . import cargar_parquet
 
 
 def cargar_archivo(ruta: Union[str, Path]) -> pd.DataFrame:
@@ -77,11 +77,11 @@ def cargar_archivo(ruta: Union[str, Path]) -> pd.DataFrame:
     
     # Mapear extensiones a funciones
     if extension == '.csv':
-        return cargar_csv(ruta)
+        return cargar_csv.cargar_csv(ruta)
     elif extension == '.xlsx':
-        return cargar_xlsx(ruta)
+        return cargar_xlsx.cargar_xlsx(ruta)
     elif extension == '.parquet':
-        return cargar_parquet(ruta)
+        return cargar_parquet.cargar_parquet(ruta)
     else:
         # Construir mensaje de error informativo
         formatos_soportados = ['.csv', '.xlsx', '.parquet']

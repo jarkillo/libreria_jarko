@@ -90,10 +90,34 @@ def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") 
             f"El archivo '{ruta}' es demasiado grande para cargar en memoria. "
             f"Error: {str(e)}"
         )
-    except Exception as e:
+    except (UnicodeDecodeError, UnicodeError) as e:
         raise ValueError(
-            f"Error inesperado al cargar el archivo '{ruta}': {str(e)}"
+            f"Error de codificación al leer el archivo '{ruta}'. "
+            f"Intenta con un encoding diferente. "
+            f"Error: {str(e)}"
         )
+    except Exception as e:
+        # Capturar errores específicos de pandas por nombre de clase
+        exception_name = type(e).__name__
+        error_msg = str(e).lower()
+        
+        # Excepciones específicas de pandas
+        if exception_name == 'ParserError' or "parse" in error_msg or "separator" in error_msg:
+            raise ValueError(
+                f"Error al parsear el archivo '{ruta}'. "
+                f"Verifica el separador o formato del archivo. "
+                f"Error: {str(e)}"
+            )
+        elif exception_name == 'EmptyDataError' or "empty" in error_msg:
+            raise ValueError(
+                f"El archivo '{ruta}' está vacío o no contiene datos válidos. "
+                f"Error: {str(e)}"
+            )
+        elif "not found" in error_msg or "does not exist" in error_msg:
+            raise FileNotFoundError(f"El archivo '{ruta}' no existe.")
+        else:
+            # Re-lanzar excepciones no esperadas para no ocultarlas
+            raise
 
     if df.empty:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")

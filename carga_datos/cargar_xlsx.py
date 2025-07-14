@@ -85,6 +85,17 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
             f"No tienes permisos para leer el archivo '{ruta}'. "
             f"Error: {str(e)}"
         )
+    except (OSError, IOError) as e:
+        raise ValueError(
+            f"No tienes permisos para leer el archivo '{ruta}'. "
+            f"Error: {str(e)}"
+        )
+    except (UnicodeDecodeError, UnicodeError) as e:
+        raise ValueError(
+            f"Error de codificación al leer el archivo '{ruta}'. "
+            f"El archivo podría estar corrupto. "
+            f"Error: {str(e)}"
+        )
     except ValueError as e:
         # Capturar errores específicos de pandas Excel
         error_msg = str(e).lower()
@@ -113,24 +124,19 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
                 f"Error al procesar el archivo '{ruta}': {str(e)}"
             )
     except Exception as e:
-        # Capturar otros errores específicos por nombre de clase
+        # Capturar errores específicos de Excel por nombre de clase
         exception_name = type(e).__name__
         error_msg = str(e).lower()
         
+        # Excepciones específicas de Excel/Zip
         if exception_name in ['BadZipFile', 'InvalidFileException'] or "not a zip file" in error_msg or "invalid file" in error_msg:
             raise ValueError(
                 f"El archivo '{ruta}' no es un archivo Excel válido. "
                 f"Error: {str(e)}"
             )
-        elif exception_name in ['FileNotFoundError', 'OSError', 'IOError'] or "permission" in error_msg or "denied" in error_msg:
+        elif exception_name == 'XLRDError' or "xlrd" in error_msg:
             raise ValueError(
-                f"No tienes permisos para leer el archivo '{ruta}'. "
-                f"Error: {str(e)}"
-            )
-        elif exception_name == 'UnicodeDecodeError' or "encoding" in error_msg:
-            raise ValueError(
-                f"Error de codificación al leer el archivo '{ruta}'. "
-                f"El archivo podría estar corrupto. "
+                f"Error al leer el archivo Excel '{ruta}' con xlrd. "
                 f"Error: {str(e)}"
             )
         elif "not supported" in error_msg or "unsupported" in error_msg:
@@ -138,10 +144,14 @@ def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
                 f"El formato del archivo '{ruta}' no es soportado por el engine '{engine}'. "
                 f"Error: {str(e)}"
             )
-        else:
+        elif "sheet" in error_msg and ("not found" in error_msg or "does not exist" in error_msg):
             raise ValueError(
-                f"Error inesperado al cargar el archivo '{ruta}': {str(e)}"
+                f"La hoja especificada '{sheet_name}' no existe en el archivo '{ruta}'. "
+                f"Error: {str(e)}"
             )
+        else:
+            # Re-lanzar excepciones no esperadas para no ocultarlas
+            raise
 
     if df.empty:
         raise ValueError(f"El archivo '{ruta}' está vacío o no contiene datos válidos.")
