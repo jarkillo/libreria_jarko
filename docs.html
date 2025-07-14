@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librería Jarko - Documentación</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .header-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .badges {
+            margin-top: 1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            margin: 0 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .nav-content a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-content a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        main {
+            padding: 2rem 0;
+        }
+
+        .section {
+            background: white;
+            margin: 2rem 0;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.4rem;
+        }
+
+        .section h4 {
+            color: #555;
+            margin: 1rem 0 0.5rem 0;
+            font-size: 1.1rem;
+        }
+
+        .function-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .function-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .function-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .function-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .function-signature {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .parameters {
+            margin: 1rem 0;
+        }
+
+        .parameters h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .parameter-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .parameter-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .parameter-name {
+            font-weight: 600;
+            color: #764ba2;
+        }
+
+        .parameter-type {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .errors {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .errors h4 {
+            color: #856404;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .error-list li {
+            padding: 0.25rem 0;
+            color: #856404;
+        }
+
+        .error-type {
+            font-weight: 600;
+        }
+
+        .example {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .example h4 {
+            color: #28a745;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+
+        .code-block .keyword {
+            color: #f687b3;
+        }
+
+        .code-block .string {
+            color: #68d391;
+        }
+
+        .code-block .comment {
+            color: #a0aec0;
+        }
+
+        .installation {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+
+        .installation h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .install-command {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 0.5rem 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .quick-start {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .quick-start h4 {
+            color: #155724;
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-to-top:hover {
+            background: #764ba2;
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .header-content h1 {
+                font-size: 2rem;
+            }
+
+            .nav-content {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .section {
+                padding: 1rem;
+            }
+
+            .function-signature,
+            .code-block {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>Librería Jarko</h1>
+                <p>Funciones Utilitarias para Procesamiento de Datos</p>
+                <div class="badges">
+                    <span class="badge">Python 3.9+</span>
+                    <span class="badge">MIT License</span>
+                    <span class="badge">v0.1.0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <div class="nav-content">
+                <a href="#instalacion">Instalación</a>
+                <a href="#carga-datos">Carga de Datos</a>
+                <a href="#utils">Utilidades</a>
+                <a href="#ejemplos">Ejemplos</a>
+                <a href="#desarrollo">Desarrollo</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container">
+            <div class="section" id="instalacion">
+                <h2>🚀 Instalación</h2>
+                <p>Para usar esta librería necesitas instalar las dependencias requeridas:</p>
+                <div class="installation">
+                    <h3>Instalación básica</h3>
+                    <div class="install-command">pip install pandas pyarrow openpyxl</div>
+
+                    <h3>Para desarrollo</h3>
+                    <div class="install-command">pip install pytest coverage flake8</div>
+                </div>
+
+                <div class="quick-start">
+                    <h4>🏃‍♂️ Inicio Rápido</h4>
+                    <div class="code-block">
+                        <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span> cargar_csv,
+                        cargar_archivo
+
+                        <span class="comment"># Cargar un archivo CSV</span>
+                        df = cargar_csv(<span class="string">"datos.csv"</span>)
+
+                        <span class="comment"># O detectar automáticamente el formato</span>
+                        df = cargar_archivo(<span class="string">"datos.csv"</span>) <span class="comment"># Funciona
+                            con .csv, .xlsx, .parquet</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="carga-datos">
+                <h2>📊 Módulo de Carga de Datos</h2>
+                <p>Funciones especializadas para cargar datos desde diferentes formatos con validaciones robustas.</p>
+
+                <div class="function-card">
+                    <div class="function-name">cargar_csv</div>
+                    <div class="function-description">
+                        Carga un archivo CSV y lo devuelve como DataFrame de pandas con validaciones robustas.
+                    </div>
+
+                    <div class="function-signature">
+                        def cargar_csv(ruta: Union[str, Path], sep: str = ",", encoding: str = "utf-8") -> pd.DataFrame
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">ruta</span>
+                                <span class="parameter-type">(Union[str, Path])</span>:
+                                Ruta del archivo CSV
+                            </li>
+                            <li>
+                                <span class="parameter-name">sep</span>
+                                <span class="parameter-type">(str)</span>:
+                                Separador del archivo (por defecto ",")
+                            </li>
+                            <li>
+                                <span class="parameter-name">encoding</span>
+                                <span class="parameter-type">(str)</span>:
+                                Codificación del archivo (por defecto "utf-8")
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">FileNotFoundError</span>: Si el archivo no existe</li>
+                            <li><span class="error-type">ValueError</span>: Problemas de encoding, parseo, archivo
+                                vacío, permisos o memoria</li>
+                            <li><span class="error-type">TypeError</span>: Parámetros incorrectos</li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_csv
+
+                            <span class="comment"># Uso básico</span>
+                            df = cargar_csv(<span class="string">"datos.csv"</span>)
+
+                            <span class="comment"># Con separador personalizado</span>
+                            df = cargar_csv(<span class="string">"datos.csv"</span>, sep=<span
+                                class="string">";"</span>)
+
+                            <span class="comment"># Con encoding específico</span>
+                            df = cargar_csv(<span class="string">"datos.csv"</span>, encoding=<span
+                                class="string">"latin1"</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">cargar_parquet</div>
+                    <div class="function-description">
+                        Carga un archivo Parquet y lo devuelve como DataFrame de pandas con validaciones robustas.
+                    </div>
+
+                    <div class="function-signature">
+                        def cargar_parquet(ruta: Union[str, Path], columns: Optional[List[str]] = None) -> pd.DataFrame
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">ruta</span>
+                                <span class="parameter-type">(Union[str, Path])</span>:
+                                Ruta del archivo Parquet
+                            </li>
+                            <li>
+                                <span class="parameter-name">columns</span>
+                                <span class="parameter-type">(Optional[List[str]])</span>:
+                                Lista de columnas específicas a cargar (opcional)
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">FileNotFoundError</span>: Si el archivo no existe</li>
+                            <li><span class="error-type">ValueError</span>: Problemas con el archivo, columnas
+                                inexistentes, permisos o memoria</li>
+                            <li><span class="error-type">TypeError</span>: Parámetros incorrectos</li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_parquet
+
+                            <span class="comment"># Cargar archivo completo</span>
+                            df = cargar_parquet(<span class="string">"datos.parquet"</span>)
+
+                            <span class="comment"># Cargar solo columnas específicas</span>
+                            df = cargar_parquet(<span class="string">"datos.parquet"</span>, columns=[<span
+                                class="string">"nombre"</span>, <span class="string">"edad"</span>])
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">cargar_xlsx</div>
+                    <div class="function-description">
+                        Carga un archivo Excel (.xlsx) y lo devuelve como DataFrame de pandas con validaciones robustas.
+                    </div>
+
+                    <div class="function-signature">
+                        def cargar_xlsx(ruta: Union[str, Path], sheet_name: Union[str, int] = 0,
+                        header: Optional[int] = 0, engine: str = 'openpyxl') -> pd.DataFrame
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">ruta</span>
+                                <span class="parameter-type">(Union[str, Path])</span>:
+                                Ruta del archivo Excel
+                            </li>
+                            <li>
+                                <span class="parameter-name">sheet_name</span>
+                                <span class="parameter-type">(Union[str, int])</span>:
+                                Nombre o índice de la hoja (por defecto 0)
+                            </li>
+                            <li>
+                                <span class="parameter-name">header</span>
+                                <span class="parameter-type">(Optional[int])</span>:
+                                Número de fila para encabezado (por defecto 0)
+                            </li>
+                            <li>
+                                <span class="parameter-name">engine</span>
+                                <span class="parameter-type">(str)</span>:
+                                Motor de lectura (por defecto 'openpyxl')
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">FileNotFoundError</span>: Si el archivo no existe</li>
+                            <li><span class="error-type">ValueError</span>: Problemas con el archivo, hoja inexistente,
+                                permisos o memoria</li>
+                            <li><span class="error-type">TypeError</span>: Parámetros incorrectos</li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_xlsx
+
+                            <span class="comment"># Cargar primera hoja</span>
+                            df = cargar_xlsx(<span class="string">"datos.xlsx"</span>)
+
+                            <span class="comment"># Cargar hoja específica por nombre</span>
+                            df = cargar_xlsx(<span class="string">"datos.xlsx"</span>, sheet_name=<span
+                                class="string">"Ventas"</span>)
+
+                            <span class="comment"># Cargar sin encabezado</span>
+                            df = cargar_xlsx(<span class="string">"datos.xlsx"</span>, header=<span
+                                class="keyword">None</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">cargar_archivo</div>
+                    <div class="function-description">
+                        Carga un archivo detectando automáticamente el formato por extensión y llamando a la función
+                        correspondiente.
+                    </div>
+
+                    <div class="function-signature">
+                        def cargar_archivo(ruta: Union[str, Path]) -> pd.DataFrame
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">ruta</span>
+                                <span class="parameter-type">(Union[str, Path])</span>:
+                                Ruta del archivo a cargar
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Formatos Soportados</h4>
+                        <ul class="parameter-list">
+                            <li>✅ <span class="parameter-name">.csv, .CSV</span> → llama a cargar_csv()</li>
+                            <li>✅ <span class="parameter-name">.xlsx, .XLSX</span> → llama a cargar_xlsx()</li>
+                            <li>✅ <span class="parameter-name">.parquet, .PARQUET</span> → llama a cargar_parquet()</li>
+                            <li>❌ <span class="parameter-name">.xls, .ods, .json, .xml</span> → No soportados</li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">FileNotFoundError</span>: Si el archivo no existe</li>
+                            <li><span class="error-type">ValueError</span>: Extensión no soportada o problemas en
+                                función específica</li>
+                            <li><span class="error-type">TypeError</span>: Parámetros incorrectos</li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_archivo
+
+                            <span class="comment"># Detección automática por extensión</span>
+                            df = cargar_archivo(<span class="string">"datos.csv"</span>) <span class="comment"># Llama a
+                                cargar_csv()</span>
+                            df = cargar_archivo(<span class="string">"datos.xlsx"</span>) <span class="comment"># Llama
+                                a cargar_xlsx()</span>
+                            df = cargar_archivo(<span class="string">"datos.parquet"</span>) <span class="comment">#
+                                Llama a cargar_parquet()</span>
+
+                            <span class="comment"># Funciona con Path objects</span>
+                            <span class="keyword">from</span> pathlib <span class="keyword">import</span> Path
+                            df = cargar_archivo(Path(<span class="string">"datos.csv"</span>))
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="utils">
+                <h2>🔧 Módulo de Utilidades</h2>
+                <p>Funciones auxiliares para el procesamiento interno de la librería.</p>
+
+                <div class="function-card">
+                    <div class="function-name">procesar_ruta</div>
+                    <div class="function-description">
+                        Procesa una ruta eliminando espacios en blanco y convirtiéndola a Path object.
+                    </div>
+
+                    <div class="function-signature">
+                        def procesar_ruta(ruta: Union[str, Path]) -> Path
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">ruta</span>
+                                <span class="parameter-type">(Union[str, Path])</span>:
+                                Ruta del archivo que se quiere procesar
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko.carga_datos.utils <span
+                                class="keyword">import</span> procesar_ruta
+
+                            <span class="comment"># Limpia espacios al inicio y final</span>
+                            ruta_limpia = procesar_ruta(<span class="string">" archivo.csv "</span>) <span
+                                class="comment"># PosixPath('archivo.csv')</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">manejar_excepcion_inesperada</div>
+                    <div class="function-description">
+                        Maneja excepciones inesperadas de forma consistente, registrando en el log y re-lanzando la
+                        excepción.
+                    </div>
+
+                    <div class="function-signature">
+                        def manejar_excepcion_inesperada(excepcion: Exception, nombre_funcion: str) -> None
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">excepcion</span>
+                                <span class="parameter-type">(Exception)</span>:
+                                La excepción que se produjo
+                            </li>
+                            <li>
+                                <span class="parameter-name">nombre_funcion</span>
+                                <span class="parameter-type">(str)</span>:
+                                Nombre de la función donde ocurrió la excepción
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="ejemplos">
+                <h2>📋 Ejemplos Prácticos</h2>
+
+                <div class="grid">
+                    <div class="function-card">
+                        <div class="function-name">Ejemplo 1: Carga básica</div>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_csv
+
+                            <span class="comment"># Cargar un CSV simple</span>
+                            df = cargar_csv(<span class="string">"ventas.csv"</span>)
+                            print(df.head())
+
+                            <span class="comment"># Información del DataFrame</span>
+                            print(df.info())
+                        </div>
+                    </div>
+
+                    <div class="function-card">
+                        <div class="function-name">Ejemplo 2: Manejo de errores</div>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_archivo
+
+                            <span class="keyword">try</span>:
+                            df = cargar_archivo(<span class="string">"datos.csv"</span>)
+                            print(<span class="string">f"Archivo cargado: {df.shape[0]} filas"</span>)
+                            <span class="keyword">except</span> FileNotFoundError:
+                            print(<span class="string">"El archivo no existe"</span>)
+                            <span class="keyword">except</span> ValueError <span class="keyword">as</span> e:
+                            print(<span class="string">f"Error en el archivo: {e}"</span>)
+                        </div>
+                    </div>
+
+                    <div class="function-card">
+                        <div class="function-name">Ejemplo 3: Diferentes formatos</div>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_xlsx, cargar_parquet
+
+                            <span class="comment"># Excel con hoja específica</span>
+                            df_excel = cargar_xlsx(<span class="string">"reporte.xlsx"</span>, sheet_name=<span
+                                class="string">"Datos"</span>)
+
+                            <span class="comment"># Parquet con columnas específicas</span>
+                            df_parquet = cargar_parquet(<span class="string">"big_data.parquet"</span>,
+                            columns=[<span class="string">"id"</span>, <span class="string">"nombre"</span>, <span
+                                class="string">"fecha"</span>])
+                        </div>
+                    </div>
+
+                    <div class="function-card">
+                        <div class="function-name">Ejemplo 4: Procesamiento avanzado</div>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_csv
+                            <span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+                            <span class="comment"># Cargar y procesar datos</span>
+                            df = cargar_csv(<span class="string">"datos.csv"</span>, sep=<span
+                                class="string">";"</span>)
+
+                            <span class="comment"># Análisis básico</span>
+                            print(df.describe())
+                            print(df.isnull().sum())
+
+                            <span class="comment"># Filtrar datos</span>
+                            df_filtered = df[df[<span class="string">'edad'</span>] > 18]
+                            print(<span class="string">f"Registros filtrados: {len(df_filtered)}"</span>)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="desarrollo">
+                <h2>👨‍💻 Desarrollo</h2>
+
+                <div class="function-card">
+                    <div class="function-name">Ejecutar Tests</div>
+                    <div class="code-block">
+                        <span class="comment"># Ejecutar todos los tests</span>
+                        python -m pytest test/ -v
+
+                        <span class="comment"># Tests con cobertura</span>
+                        coverage run -m pytest test/
+                        coverage report -m
+
+                        <span class="comment"># Tests específicos</span>
+                        python -m pytest test/test_cargar_csv.py -v
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">Linting y Formato</div>
+                    <div class="code-block">
+                        <span class="comment"># Verificar estilo de código</span>
+                        flake8 . --max-line-length=127
+
+                        <span class="comment"># Formatear código</span>
+                        black . --line-length=127
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">Convenciones del Proyecto</div>
+                    <ul class="parameter-list">
+                        <li>Funciones y variables en <span class="parameter-name">snake_case</span></li>
+                        <li>Clases en <span class="parameter-name">PascalCase</span></li>
+                        <li>Constantes en <span class="parameter-name">MAYUSCULAS_CON_GUIONES</span></li>
+                        <li>Tipado explícito en todas las funciones</li>
+                        <li>Documentación en español con ejemplos</li>
+                        <li>Tests obligatorios para cada función</li>
+                        <li>Cobertura de código > 90%</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Librería Jarko - Funciones Utilitarias | Desarrollado por Jarko</p>
+        </div>
+    </footer>
+
+    <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        ↑
+    </button>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Show/hide back to top button
+        const backToTopButton = document.querySelector('.back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.style.display = 'block';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+
+        // Hide back to top button initially
+        backToTopButton.style.display = 'none';
+
+        // Add active class to current section in navigation
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('nav a');
+
+            let currentSection = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (pageYOffset >= sectionTop) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${currentSection}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
