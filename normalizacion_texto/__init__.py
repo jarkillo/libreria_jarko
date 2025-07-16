@@ -22,4 +22,4 @@ __all__ = [
     "limpiar_espacios",
     "normalizar_caracteres",
     "normalizar_texto"
-] 
+]
