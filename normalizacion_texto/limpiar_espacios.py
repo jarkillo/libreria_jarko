@@ -66,4 +66,4 @@ def limpiar_espacios(texto: Any) -> str:
         return texto_limpio
         
     except Exception as e:
-        manejar_excepcion_texto(e, 'limpiar_espacios', texto_validado) 
+        manejar_excepcion_texto(e, 'limpiar_espacios', texto_validado)
