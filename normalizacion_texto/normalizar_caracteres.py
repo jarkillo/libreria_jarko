@@ -119,4 +119,4 @@ def normalizar_caracteres(texto: Any, reemplazos_personalizados: Optional[Dict[s
         return texto_normalizado
         
     except Exception as e:
-        manejar_excepcion_texto(e, 'normalizar_caracteres', texto_validado) 
+        manejar_excepcion_texto(e, 'normalizar_caracteres', texto_validado)
