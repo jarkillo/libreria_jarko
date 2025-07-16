@@ -85,4 +85,4 @@ def quitar_acentos(texto: Any) -> str:
         return texto_sin_acentos
         
     except Exception as e:
-        manejar_excepcion_texto(e, 'quitar_acentos', texto_validado) 
+        manejar_excepcion_texto(e, 'quitar_acentos', texto_validado)
