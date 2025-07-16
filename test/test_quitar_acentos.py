@@ -122,4 +122,4 @@ class TestQuitarAcentos:
         # Algunos caracteres especiales que combinan múltiples marcas
         texto = "e\u0301\u0302"  # e con acento agudo y circunflejo
         resultado = quitar_acentos(texto)
-        assert resultado == "e" 
+        assert resultado == "e"
