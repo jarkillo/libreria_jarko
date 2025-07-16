@@ -167,4 +167,4 @@ class TestLimpiarEspacios:
     def test_limpiar_texto_con_numeros_y_espacios(self):
         """Test con números y espacios mixtos"""
         resultado = limpiar_espacios("  123   +   456   =   579  ")
-        assert resultado == "123 + 456 = 579" 
+        assert resultado == "123 + 456 = 579"
