@@ -345,11 +345,11 @@
         <div class="container">
             <div class="header-content">
                 <h1>Librería Jarko</h1>
-                <p>Funciones Utilitarias para Procesamiento de Datos</p>
+                <p>Funciones Utilitarias para Procesamiento de Datos y Normalización de Texto</p>
                 <div class="badges">
                     <span class="badge">Python 3.9+</span>
                     <span class="badge">MIT License</span>
-                    <span class="badge">v0.1.0</span>
+                    <span class="badge">v0.2.0</span>
                 </div>
             </div>
         </div>
@@ -360,6 +360,7 @@
             <div class="nav-content">
                 <a href="#instalacion">Instalación</a>
                 <a href="#carga-datos">Carga de Datos</a>
+                <a href="#normalizacion-texto">Normalización de Texto</a>
                 <a href="#utils">Utilidades</a>
                 <a href="#ejemplos">Ejemplos</a>
                 <a href="#desarrollo">Desarrollo</a>
@@ -384,7 +385,7 @@
                     <h4>🏃‍♂️ Inicio Rápido</h4>
                     <div class="code-block">
                         <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span> cargar_csv,
-                        cargar_archivo
+                        cargar_archivo, normalizar_texto
 
                         <span class="comment"># Cargar un archivo CSV</span>
                         df = cargar_csv(<span class="string">"datos.csv"</span>)
@@ -392,6 +393,10 @@
                         <span class="comment"># O detectar automáticamente el formato</span>
                         df = cargar_archivo(<span class="string">"datos.csv"</span>) <span class="comment"># Funciona
                             con .csv, .xlsx, .parquet</span>
+
+                        <span class="comment"># Normalizar texto</span>
+                        texto_limpio = normalizar_texto(<span class="string">"José María"</span>) <span
+                            class="comment"># "jose maria"</span>
                     </div>
                 </div>
             </div>
@@ -644,6 +649,361 @@
                 </div>
             </div>
 
+            <div class="section" id="normalizacion-texto">
+                <h2>✨ Módulo de Normalización de Texto</h2>
+                <p>Funciones especializadas para normalizar y limpiar texto con validaciones robustas.</p>
+
+                <div class="function-card">
+                    <div class="function-name">quitar_acentos</div>
+                    <div class="function-description">
+                        Elimina todos los acentos de un texto, preservando la estructura y convirtiendo caracteres
+                        acentuados a su equivalente sin acento.
+                    </div>
+
+                    <div class="function-signature">
+                        def quitar_acentos(texto: str) -> str
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">texto</span>
+                                <span class="parameter-type">(str)</span>:
+                                Texto del cual se quieren eliminar los acentos
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">TypeError</span>: Si el parámetro no es string</li>
+                            <li><span class="error-type">ValueError</span>: Si el string está vacío o es solo espacios
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            quitar_acentos
+
+                            <span class="comment"># Eliminar acentos básicos</span>
+                            resultado = quitar_acentos(<span class="string">"José María"</span>) <span class="comment">#
+                                "Jose Maria"</span>
+
+                            <span class="comment"># Funciona con caracteres especiales</span>
+                            resultado = quitar_acentos(<span class="string">"Niño español"</span>) <span
+                                class="comment"># "Nino espanol"</span>
+
+                            <span class="comment"># Preserva estructura</span>
+                            resultado = quitar_acentos(<span class="string">"¡Hólà! ¿Cómó estás?"</span>) <span
+                                class="comment"># "¡Hola! ¿Como estas?"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">convertir_a_minusculas</div>
+                    <div class="function-description">
+                        Convierte todo el texto a minúsculas, incluyendo caracteres Unicode y acentuados.
+                    </div>
+
+                    <div class="function-signature">
+                        def convertir_a_minusculas(texto: str) -> str
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">texto</span>
+                                <span class="parameter-type">(str)</span>:
+                                Texto a convertir a minúsculas
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">TypeError</span>: Si el parámetro no es string</li>
+                            <li><span class="error-type">ValueError</span>: Si el string está vacío o es solo espacios
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            convertir_a_minusculas
+
+                            <span class="comment"># Conversión básica</span>
+                            resultado = convertir_a_minusculas(<span class="string">"HOLA MUNDO"</span>) <span
+                                class="comment"># "hola mundo"</span>
+
+                            <span class="comment"># Con acentos</span>
+                            resultado = convertir_a_minusculas(<span class="string">"JOSÉ MARÍA"</span>) <span
+                                class="comment"># "josé maría"</span>
+
+                            <span class="comment"># Caracteres mixtos</span>
+                            resultado = convertir_a_minusculas(<span class="string">"PyThOn 123"</span>) <span
+                                class="comment"># "python 123"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">convertir_a_mayusculas</div>
+                    <div class="function-description">
+                        Convierte todo el texto a mayúsculas, incluyendo caracteres Unicode y acentuados.
+                    </div>
+
+                    <div class="function-signature">
+                        def convertir_a_mayusculas(texto: str) -> str
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">texto</span>
+                                <span class="parameter-type">(str)</span>:
+                                Texto a convertir a mayúsculas
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">TypeError</span>: Si el parámetro no es string</li>
+                            <li><span class="error-type">ValueError</span>: Si el string está vacío o es solo espacios
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            convertir_a_mayusculas
+
+                            <span class="comment"># Conversión básica</span>
+                            resultado = convertir_a_mayusculas(<span class="string">"hola mundo"</span>) <span
+                                class="comment"># "HOLA MUNDO"</span>
+
+                            <span class="comment"># Con acentos</span>
+                            resultado = convertir_a_mayusculas(<span class="string">"josé maría"</span>) <span
+                                class="comment"># "JOSÉ MARÍA"</span>
+
+                            <span class="comment"># Caracteres mixtos</span>
+                            resultado = convertir_a_mayusculas(<span class="string">"PyThOn 123"</span>) <span
+                                class="comment"># "PYTHON 123"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">limpiar_espacios</div>
+                    <div class="function-description">
+                        Normaliza todos los espacios en blanco: elimina espacios al inicio y final, convierte
+                        tabulaciones y saltos de línea a espacios, y reduce múltiples espacios a uno solo.
+                    </div>
+
+                    <div class="function-signature">
+                        def limpiar_espacios(texto: str) -> str
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">texto</span>
+                                <span class="parameter-type">(str)</span>:
+                                Texto del cual se quieren limpiar los espacios
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">TypeError</span>: Si el parámetro no es string</li>
+                            <li><span class="error-type">ValueError</span>: Si el string está vacío o es solo espacios
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            limpiar_espacios
+
+                            <span class="comment"># Eliminar espacios extra</span>
+                            resultado = limpiar_espacios(<span class="string">" hola mundo "</span>) <span
+                                class="comment"># "hola mundo"</span>
+
+                            <span class="comment"># Normalizar tabulaciones</span>
+                            resultado = limpiar_espacios(<span class="string">"hola\t\tmundo"</span>) <span
+                                class="comment"># "hola mundo"</span>
+
+                            <span class="comment"># Saltos de línea</span>
+                            resultado = limpiar_espacios(<span class="string">"línea1\nlínea2"</span>) <span
+                                class="comment"># "línea1 línea2"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">normalizar_caracteres</div>
+                    <div class="function-description">
+                        Reemplaza caracteres especiales y Unicode por sus equivalentes ASCII básicos. Incluye más de 50
+                        caracteres especiales como comillas tipográficas, guiones largos, símbolos monetarios, etc.
+                    </div>
+
+                    <div class="function-signature">
+                        def normalizar_caracteres(texto: str, reemplazos_personalizados: Optional[Dict[str, str]] =
+                        None) -> str
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">texto</span>
+                                <span class="parameter-type">(str)</span>:
+                                Texto en el cual normalizar caracteres especiales
+                            </li>
+                            <li>
+                                <span class="parameter-name">reemplazos_personalizados</span>
+                                <span class="parameter-type">(Optional[Dict[str, str]])</span>:
+                                Diccionario con reemplazos adicionales personalizados
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">TypeError</span>: Si los parámetros no son del tipo correcto
+                            </li>
+                            <li><span class="error-type">ValueError</span>: Si el string está vacío o es solo espacios
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            normalizar_caracteres
+
+                            <span class="comment"># Normalizar caracteres especiales</span>
+                            resultado = normalizar_caracteres(<span class="string">"Texto "especial" —con €"</span>)
+                            <span class="comment"># 'Texto "especial" -con EUR'</span>
+
+                            <span class="comment"># Con reemplazos personalizados</span>
+                            reemplazos = {<span class="string">"©"</span>: <span class="string">"(c)"</span>, <span
+                                class="string">"®"</span>: <span class="string">"(r)"</span>}
+                            resultado = normalizar_caracteres(<span class="string">"Microsoft® ©2024"</span>,
+                            reemplazos) <span class="comment"># "Microsoft(r) (c)2024"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="function-card">
+                    <div class="function-name">normalizar_texto</div>
+                    <div class="function-description">
+                        Función principal que combina todas las normalizaciones de texto de manera configurable. Permite
+                        aplicar selectivamente cada tipo de normalización.
+                    </div>
+
+                    <div class="function-signature">
+                        def normalizar_texto(texto: str, quitar_acentos: bool = True, convertir_minusculas: bool = True,
+                        limpiar_espacios: bool = True, normalizar_caracteres: bool = True, reemplazos_personalizados:
+                        Optional[Dict[str, str]] = None, preservar_mayusculas: bool = False) -> str
+                    </div>
+
+                    <div class="parameters">
+                        <h4>Parámetros</h4>
+                        <ul class="parameter-list">
+                            <li>
+                                <span class="parameter-name">texto</span>
+                                <span class="parameter-type">(str)</span>:
+                                Texto a normalizar
+                            </li>
+                            <li>
+                                <span class="parameter-name">quitar_acentos</span>
+                                <span class="parameter-type">(bool)</span>:
+                                Si eliminar acentos (por defecto True)
+                            </li>
+                            <li>
+                                <span class="parameter-name">convertir_minusculas</span>
+                                <span class="parameter-type">(bool)</span>:
+                                Si convertir a minúsculas (por defecto True)
+                            </li>
+                            <li>
+                                <span class="parameter-name">limpiar_espacios</span>
+                                <span class="parameter-type">(bool)</span>:
+                                Si normalizar espacios (por defecto True)
+                            </li>
+                            <li>
+                                <span class="parameter-name">normalizar_caracteres</span>
+                                <span class="parameter-type">(bool)</span>:
+                                Si normalizar caracteres especiales (por defecto True)
+                            </li>
+                            <li>
+                                <span class="parameter-name">reemplazos_personalizados</span>
+                                <span class="parameter-type">(Optional[Dict[str, str]])</span>:
+                                Reemplazos adicionales personalizados
+                            </li>
+                            <li>
+                                <span class="parameter-name">preservar_mayusculas</span>
+                                <span class="parameter-type">(bool)</span>:
+                                Si preservar mayúsculas (anula convertir_minusculas)
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="errors">
+                        <h4>⚠️ Posibles Errores</h4>
+                        <ul class="error-list">
+                            <li><span class="error-type">TypeError</span>: Si los parámetros no son del tipo correcto
+                            </li>
+                            <li><span class="error-type">ValueError</span>: Si el string está vacío o es solo espacios
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="example">
+                        <h4>💡 Ejemplo de Uso</h4>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            normalizar_texto
+
+                            <span class="comment"># Normalización completa</span>
+                            resultado = normalizar_texto(<span class="string">" José María —está aquí! "</span>) <span
+                                class="comment"># "jose maria -esta aqui!"</span>
+
+                            <span class="comment"># Solo quitar acentos</span>
+                            resultado = normalizar_texto(<span class="string">"José María"</span>,
+                            convertir_minusculas=<span class="keyword">False</span>) <span class="comment"># "Jose
+                                Maria"</span>
+
+                            <span class="comment"># Preservar mayúsculas</span>
+                            resultado = normalizar_texto(<span class="string">"José MARÍA"</span>,
+                            preservar_mayusculas=<span class="keyword">True</span>) <span class="comment"># "Jose
+                                MARIA"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="section" id="utils">
                 <h2>🔧 Módulo de Utilidades</h2>
                 <p>Funciones auxiliares para el procesamiento interno de la librería.</p>
@@ -731,14 +1091,57 @@
                     </div>
 
                     <div class="function-card">
-                        <div class="function-name">Ejemplo 2: Manejo de errores</div>
+                        <div class="function-name">Ejemplo 2: Normalización de texto</div>
                         <div class="code-block">
                             <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
-                            cargar_archivo
+                            normalizar_texto, quitar_acentos
+
+                            <span class="comment"># Normalización completa</span>
+                            texto = <span class="string">" José María —está aquí! "</span>
+                            texto_limpio = normalizar_texto(texto)
+                            print(texto_limpio) <span class="comment"># "jose maria -esta aqui!"</span>
+
+                            <span class="comment"># Solo quitar acentos</span>
+                            sin_acentos = quitar_acentos(<span class="string">"Niño español"</span>)
+                            print(sin_acentos) <span class="comment"># "Nino espanol"</span>
+                        </div>
+                    </div>
+
+                    <div class="function-card">
+                        <div class="function-name">Ejemplo 3: Procesamiento de datos con texto</div>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_csv, normalizar_texto
+                            <span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+                            <span class="comment"># Cargar datos</span>
+                            df = cargar_csv(<span class="string">"clientes.csv"</span>)
+
+                            <span class="comment"># Normalizar columna de nombres</span>
+                            df[<span class="string">'nombre_normalizado'</span>] = df[<span
+                                class="string">'nombre'</span>].apply(normalizar_texto)
+
+                            <span class="comment"># Ver resultados</span>
+                            print(df[[<span class="string">'nombre'</span>, <span
+                                class="string">'nombre_normalizado'</span>]].head())
+                        </div>
+                    </div>
+
+                    <div class="function-card">
+                        <div class="function-name">Ejemplo 4: Manejo de errores</div>
+                        <div class="code-block">
+                            <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
+                            cargar_archivo, normalizar_texto
 
                             <span class="keyword">try</span>:
                             df = cargar_archivo(<span class="string">"datos.csv"</span>)
                             print(<span class="string">f"Archivo cargado: {df.shape[0]} filas"</span>)
+
+                            <span class="comment"># Normalizar textos en el DataFrame</span>
+                            <span class="keyword">for</span> col <span class="keyword">in</span>
+                            df.select_dtypes(include=[<span class="string">'object'</span>]).columns:
+                            df[col] = df[col].astype(str).apply(normalizar_texto)
+
                             <span class="keyword">except</span> FileNotFoundError:
                             print(<span class="string">"El archivo no existe"</span>)
                             <span class="keyword">except</span> ValueError <span class="keyword">as</span> e:
@@ -747,7 +1150,7 @@
                     </div>
 
                     <div class="function-card">
-                        <div class="function-name">Ejemplo 3: Diferentes formatos</div>
+                        <div class="function-name">Ejemplo 5: Diferentes formatos</div>
                         <div class="code-block">
                             <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
                             cargar_xlsx, cargar_parquet
@@ -757,30 +1160,29 @@
                                 class="string">"Datos"</span>)
 
                             <span class="comment"># Parquet con columnas específicas</span>
-                            df_parquet = cargar_parquet(<span class="string">"big_data.parquet"</span>,
-                            columns=[<span class="string">"id"</span>, <span class="string">"nombre"</span>, <span
+                            df_parquet = cargar_parquet(<span class="string">"big_data.parquet"</span>, columns=[<span
+                                class="string">"id"</span>, <span class="string">"nombre"</span>, <span
                                 class="string">"fecha"</span>])
                         </div>
                     </div>
 
                     <div class="function-card">
-                        <div class="function-name">Ejemplo 4: Procesamiento avanzado</div>
+                        <div class="function-name">Ejemplo 6: Configuración avanzada de normalización</div>
                         <div class="code-block">
                             <span class="keyword">from</span> libreria_jarko <span class="keyword">import</span>
-                            cargar_csv
-                            <span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+                            normalizar_texto, limpiar_espacios
 
-                            <span class="comment"># Cargar y procesar datos</span>
-                            df = cargar_csv(<span class="string">"datos.csv"</span>, sep=<span
-                                class="string">";"</span>)
+                            <span class="comment"># Normalización personalizada</span>
+                            reemplazos = {<span class="string">"©"</span>: <span class="string">"(c)"</span>, <span
+                                class="string">"®"</span>: <span class="string">"(r)"</span>}
+                            texto = <span class="string">"Microsoft® ©2024 —Todos los derechos"</span>
 
-                            <span class="comment"># Análisis básico</span>
-                            print(df.describe())
-                            print(df.isnull().sum())
-
-                            <span class="comment"># Filtrar datos</span>
-                            df_filtered = df[df[<span class="string">'edad'</span>] > 18]
-                            print(<span class="string">f"Registros filtrados: {len(df_filtered)}"</span>)
+                            resultado = normalizar_texto(
+                            texto,
+                            preservar_mayusculas=<span class="keyword">True</span>,
+                            reemplazos_personalizados=reemplazos
+                            )
+                            print(resultado) <span class="comment"># "Microsoft(r) (c)2024 -Todos los derechos"</span>
                         </div>
                     </div>
                 </div>
@@ -799,8 +1201,9 @@
                         coverage run -m pytest test/
                         coverage report -m
 
-                        <span class="comment"># Tests específicos</span>
+                        <span class="comment"># Tests específicos por módulo</span>
                         python -m pytest test/test_cargar_csv.py -v
+                        python -m pytest test/test_normalizar_texto.py -v
                     </div>
                 </div>
 
@@ -825,6 +1228,8 @@
                         <li>Documentación en español con ejemplos</li>
                         <li>Tests obligatorios para cada función</li>
                         <li>Cobertura de código > 90%</li>
+                        <li>Solo dependencias estándar de Python (excepto pandas, pyarrow, openpyxl)</li>
+                        <li>Compatibilidad multiplataforma garantizada</li>
                     </ul>
                 </div>
             </div>

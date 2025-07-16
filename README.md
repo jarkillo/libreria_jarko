@@ -4,7 +4,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Esta librería contiene funciones utilitarias para facilitar tareas comunes de procesamiento de datos, organizadas en módulos especializados.
+Esta librería contiene funciones utilitarias para facilitar tareas comunes de procesamiento de datos y normalización de texto, organizadas en módulos especializados.
 
 ## Funciones Disponibles
 
@@ -190,6 +190,222 @@ df = cargar_archivo("datos.csv")
 
 **Tests comprehensivos**: Las funciones cuentan con tests que cubren todos los casos de uso y errores posibles, garantizando robustez y confiabilidad.
 
+### Módulo `normalizacion_texto`
+
+#### `quitar_acentos`
+
+**Descripción**: Elimina acentos y caracteres diacríticos del texto, convirtiéndolos a su equivalente ASCII.
+
+**Firma**: 
+```python
+def quitar_acentos(texto: Any) -> str
+```
+
+**Parámetros**:
+- `texto`: El texto del cual quitar los acentos (Any - se convertirá a string si no lo es)
+
+**Retorna**: String sin acentos ni caracteres diacríticos
+
+**Errores**:
+- `TypeError`: Si no se puede convertir el input a string
+
+**Ejemplo de uso**:
+```python
+# Importar desde el paquete principal (recomendado)
+from libreria_jarko import quitar_acentos
+resultado = quitar_acentos("José María")  # "Jose Maria"
+
+# Funciona con diferentes tipos de entrada
+resultado = quitar_acentos("niño español")  # "nino espanol"
+resultado = quitar_acentos(123)  # "123"
+
+# O importar desde el módulo específico
+from libreria_jarko.normalizacion_texto.quitar_acentos import quitar_acentos
+```
+
+#### `convertir_a_minusculas`
+
+**Descripción**: Convierte todo el texto a minúsculas de forma robusta.
+
+**Firma**: 
+```python
+def convertir_a_minusculas(texto: Any) -> str
+```
+
+**Parámetros**:
+- `texto`: El texto a convertir (Any - se convertirá a string si no lo es)
+
+**Retorna**: String en minúsculas
+
+**Errores**:
+- `TypeError`: Si no se puede convertir el input a string
+
+**Ejemplo de uso**:
+```python
+from libreria_jarko import convertir_a_minusculas
+resultado = convertir_a_minusculas("HOLA MUNDO")  # "hola mundo"
+resultado = convertir_a_minusculas("José MARÍA")  # "josé maría"
+```
+
+#### `convertir_a_mayusculas`
+
+**Descripción**: Convierte todo el texto a mayúsculas de forma robusta.
+
+**Firma**: 
+```python
+def convertir_a_mayusculas(texto: Any) -> str
+```
+
+**Parámetros**:
+- `texto`: El texto a convertir (Any - se convertirá a string si no lo es)
+
+**Retorna**: String en mayúsculas
+
+**Errores**:
+- `TypeError`: Si no se puede convertir el input a string
+
+**Ejemplo de uso**:
+```python
+from libreria_jarko import convertir_a_mayusculas
+resultado = convertir_a_mayusculas("hola mundo")  # "HOLA MUNDO"
+resultado = convertir_a_mayusculas("josé maría")  # "JOSÉ MARÍA"
+```
+
+#### `limpiar_espacios`
+
+**Descripción**: Limpia y normaliza espacios en blanco del texto.
+
+**Firma**: 
+```python
+def limpiar_espacios(texto: Any) -> str
+```
+
+**Parámetros**:
+- `texto`: El texto a limpiar (Any - se convertirá a string si no lo es)
+
+**Retorna**: String con espacios normalizados
+
+**Operaciones que realiza**:
+- Elimina espacios al inicio y final (strip)
+- Convierte múltiples espacios consecutivos en uno solo
+- Convierte tabulaciones y saltos de línea en espacios simples
+- Elimina espacios antes y después de signos de puntuación comunes
+
+**Errores**:
+- `TypeError`: Si no se puede convertir el input a string
+
+**Ejemplo de uso**:
+```python
+from libreria_jarko import limpiar_espacios
+resultado = limpiar_espacios("  hola   mundo  ")  # "hola mundo"
+resultado = limpiar_espacios("texto\t\ncon\tespacios")  # "texto con espacios"
+resultado = limpiar_espacios("hola , mundo ; bien")  # "hola, mundo; bien"
+```
+
+#### `normalizar_caracteres`
+
+**Descripción**: Normaliza caracteres especiales y extraños a equivalentes ASCII más comunes.
+
+**Firma**: 
+```python
+def normalizar_caracteres(texto: Any, reemplazos_personalizados: Optional[Dict[str, str]] = None) -> str
+```
+
+**Parámetros**:
+- `texto`: El texto a normalizar (Any - se convertirá a string si no lo es)
+- `reemplazos_personalizados`: Diccionario adicional de reemplazos personalizados (opcional)
+
+**Retorna**: String con caracteres normalizados
+
+**Caracteres que normaliza**:
+- Comillas tipográficas: " " → " "
+- Guiones largos: — – → -
+- Puntos suspensivos: … → ...
+- Símbolos matemáticos: × ÷ ± → x / +/-
+- Monedas: € £ ¥ → EUR GBP YEN
+- Espacios especiales Unicode → espacios normales
+
+**Errores**:
+- `TypeError`: Si no se puede convertir el input a string o si reemplazos_personalizados no es un diccionario
+
+**Ejemplo de uso**:
+```python
+from libreria_jarko import normalizar_caracteres
+resultado = normalizar_caracteres("Texto con "comillas" y —guiones—")  
+# 'Texto con "comillas" y -guiones-'
+
+# Con reemplazos personalizados
+reemplazos = {"€": "EUROS"}
+resultado = normalizar_caracteres("Precio: 25€", reemplazos)  # "Precio: 25EUROS"
+```
+
+#### `normalizar_texto`
+
+**Descripción**: Función principal que combina todas las normalizaciones de forma configurable.
+
+**Firma**: 
+```python
+def normalizar_texto(
+    texto: Any,
+    quitar_acentos_flag: bool = True,
+    convertir_caso: Optional[Literal['minusculas', 'mayusculas']] = 'minusculas',
+    limpiar_espacios_flag: bool = True,
+    normalizar_caracteres_flag: bool = True,
+    reemplazos_personalizados: Optional[Dict[str, str]] = None
+) -> str
+```
+
+**Parámetros**:
+- `texto`: El texto a normalizar (Any - se convertirá a string si no lo es)
+- `quitar_acentos_flag`: Si aplicar eliminación de acentos (por defecto True)
+- `convertir_caso`: Conversión de caso ('minusculas', 'mayusculas' o None, por defecto 'minusculas')
+- `limpiar_espacios_flag`: Si aplicar limpieza de espacios (por defecto True)
+- `normalizar_caracteres_flag`: Si aplicar normalización de caracteres especiales (por defecto True)
+- `reemplazos_personalizados`: Reemplazos adicionales para normalizar_caracteres (opcional)
+
+**Retorna**: String completamente normalizado según las opciones especificadas
+
+**Orden de operaciones**:
+1. Normalizar caracteres especiales
+2. Quitar acentos
+3. Convertir caso
+4. Limpiar espacios
+
+**Errores**:
+- `TypeError`: Si los parámetros no son del tipo correcto
+- `ValueError`: Si convertir_caso tiene un valor inválido
+- Propaga errores de las funciones individuales
+
+**Ejemplo de uso**:
+```python
+from libreria_jarko import normalizar_texto
+
+# Normalización completa (por defecto)
+resultado = normalizar_texto("  José María —texto con "comillas"  ")
+# 'jose maria -texto con "comillas"'
+
+# Solo conversión a mayúsculas
+resultado = normalizar_texto("texto", convertir_caso='mayusculas')  # 'TEXTO'
+
+# Sin conversión de caso
+resultado = normalizar_texto("Texto", convertir_caso=None)  # 'texto'
+
+# Con reemplazos personalizados
+reemplazos = {"María": "Maria"}
+resultado = normalizar_texto("José María", reemplazos_personalizados=reemplazos)
+# 'jose maria'
+
+# Configuración personalizada
+resultado = normalizar_texto(
+    "  JOSÉ™ MARÍA€  ",
+    quitar_acentos_flag=True,
+    convertir_caso='minusculas',
+    limpiar_espacios_flag=True,
+    normalizar_caracteres_flag=True
+)
+# 'josetm mariateur'
+```
+
 ### Módulo `utils`
 
 #### `procesar_ruta`
@@ -257,6 +473,8 @@ Para usar esta librería necesitas:
 ```bash
 pip install pandas pyarrow openpyxl
 ```
+
+**Nota**: El módulo de normalización de texto solo requiere librerías estándar de Python (unicodedata, re), por lo que no necesita dependencias adicionales.
 
 Para ejecutar los tests:
 ```bash
