@@ -72,4 +72,4 @@ def manejar_excepcion_texto(excepcion: Exception, nombre_funcion: str, texto_ori
         f"Excepción inesperada en {nombre_funcion} procesando '{texto_muestra}': "
         f"{exception_name}: {str(excepcion)}"
     )
-    raise excepcion 
+    raise excepcion
