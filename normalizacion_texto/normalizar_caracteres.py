@@ -13,8 +13,8 @@ from .utils import validar_entrada_texto, manejar_excepcion_texto
 # Diccionario de reemplazos para caracteres especiales comunes
 REEMPLAZOS_CARACTERES: Dict[str, str] = {
     # Comillas y apostrofes
-    '"': '"',
-    '"': '"',
+    '\u201C': '"',  # left double quotation mark
+    '\u201D': '"',  # right double quotation mark
     ''': "'",
     ''': "'",
     '«': '"',
@@ -30,7 +30,7 @@ REEMPLAZOS_CARACTERES: Dict[str, str] = {
     '―': '-',  # horizontal bar
     
     # Espacios especiales
-    ' ': ' ',  # non-breaking space
+    '\u00A0': ' ',  # non-breaking space
     '\u200b': '',  # zero-width space
     '\u2009': ' ',  # thin space
     '\u2008': ' ',  # punctuation space
@@ -103,14 +103,14 @@ def normalizar_caracteres(texto: Any, reemplazos_personalizados: Optional[Dict[s
     try:
         texto_normalizado = texto_validado
         
-        # Aplicar reemplazos por defecto
-        for caracter_original, caracter_reemplazo in REEMPLAZOS_CARACTERES.items():
-            texto_normalizado = texto_normalizado.replace(caracter_original, caracter_reemplazo)
-        
-        # Aplicar reemplazos personalizados si se proporcionan
+        # Combinar reemplazos: los personalizados sobrescriben los por defecto
+        reemplazos_finales = REEMPLAZOS_CARACTERES.copy()
         if reemplazos_personalizados:
-            for caracter_original, caracter_reemplazo in reemplazos_personalizados.items():
-                texto_normalizado = texto_normalizado.replace(caracter_original, caracter_reemplazo)
+            reemplazos_finales.update(reemplazos_personalizados)
+        
+        # Aplicar todos los reemplazos
+        for caracter_original, caracter_reemplazo in reemplazos_finales.items():
+            texto_normalizado = texto_normalizado.replace(caracter_original, caracter_reemplazo)
         
         # Limpiar caracteres de control que puedan haber quedado
         # Mantener solo caracteres imprimibles y espacios básicos

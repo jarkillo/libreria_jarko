@@ -155,7 +155,7 @@ class TestNormalizarCaracteres:
         """Test con caracteres Unicode complejos"""
         texto = "Texto con \u2026 y \u2013 y \u201C comillas \u201D"
         resultado = normalizar_caracteres(texto)
-        assert resultado == 'Texto con ... y - y "comillas "'
+        assert resultado == 'Texto con ... y - y " comillas "'
 
     def test_normalizar_preservar_acentos(self):
         """Test que la normalización preserva acentos (no los elimina)"""
