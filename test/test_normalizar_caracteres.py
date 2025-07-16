@@ -178,4 +178,4 @@ class TestNormalizarCaracteres:
     def test_normalizar_comas_especiales(self):
         """Test normalizando comas especiales tipográficas"""
         resultado = normalizar_caracteres("Texto‚ con comas„ especiales")
-        assert resultado == 'Texto, con comas" especiales' 
+        assert resultado == 'Texto, con comas" especiales'
