@@ -114,4 +114,4 @@ def normalizar_texto(
         return texto_resultado
 
     except Exception as e:
-        manejar_excepcion_texto(e, 'normalizar_texto', texto_validado) 
+        manejar_excepcion_texto(e, 'normalizar_texto', texto_validado)
