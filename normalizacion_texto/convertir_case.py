@@ -78,4 +78,4 @@ def convertir_a_mayusculas(texto: Any) -> str:
     try:
         return texto_validado.upper()
     except Exception as e:
-        manejar_excepcion_texto(e, 'convertir_a_mayusculas', texto_validado) 
+        manejar_excepcion_texto(e, 'convertir_a_mayusculas', texto_validado)
