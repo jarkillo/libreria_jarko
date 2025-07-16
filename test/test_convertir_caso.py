@@ -164,4 +164,4 @@ class TestConvertirAMayusculas:
     def test_convertir_simbolos_matematicos(self):
         """Test que símbolos matemáticos se mantienen"""
         resultado = convertir_a_mayusculas("texto + números = resultado")
-        assert resultado == "TEXTO + NÚMEROS = RESULTADO" 
+        assert resultado == "TEXTO + NÚMEROS = RESULTADO"
